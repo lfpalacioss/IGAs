@@ -1,0 +1,13 @@
+name: LF_123
+title: LF_123
+username:
+account: lfpalacios
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 3803589
+bundleId: 4355186
+url: https://lfpalacios.shinyapps.io/LF_123/
+when: 1615930501.20999
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: global.R
