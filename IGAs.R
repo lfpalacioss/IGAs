@@ -1,4 +1,4 @@
-###############################################################
+###############################################################444
 #########  MONITOREO DE LOS AVANCES DE LA BD IGA's  ###########
 ###########################  BY LF  ###########################
 ###############################################################
@@ -73,7 +73,7 @@ tp1<-tempfile()
 #DESCARGAR 
 download.file(FUENTE,tp1,mode ="wb")
 
-#SELECCIONAR LA PESTAÑA DEL TEMPORAL
+#SELECCIONAR LA PESTA?A DEL TEMPORAL
 BD_INAF<-read_xlsx(path = tp1, sheet = "BD_INAF")
 
 
@@ -81,7 +81,7 @@ BD_INAF<-read_xlsx(path = tp1, sheet = "BD_INAF")
 #BD_INAF <- BD_INAF[ ,-(14:16)]
 BD_INAF <- BD_INAF[ ,!colnames(BD_INAF)=="Certificador"]
 BD_INAF <- BD_INAF[ ,!colnames(BD_INAF)=="Consultora ambiental"]
-BD_INAF <- BD_INAF[ ,!colnames(BD_INAF)=="Documento de aprobación"]
+BD_INAF <- BD_INAF[ ,!colnames(BD_INAF)=="Documento de aprobaci?n"]
 
 
 #RENOMBRANDO VARIABLES
@@ -90,8 +90,8 @@ names(BD_INAF)[names(BD_INAF) == 'Administrado'] <- 'ADM_ACT'
 names(BD_INAF)[names(BD_INAF) == 'Administrado original'] <- 'ADM_ORIG'
 names(BD_INAF)[names(BD_INAF) == 'Unidad fiscalizable'] <- 'UF'
 names(BD_INAF)[names(BD_INAF) == 'Subsector'] <- 'SUB_SECT'
-names(BD_INAF)[names(BD_INAF) == 'Tipo de documento de aprobación'] <- 'T_DOC_APROB'
-names(BD_INAF)[names(BD_INAF) == 'Fecha de aprobación'] <- 'F_APROB'
+names(BD_INAF)[names(BD_INAF) == 'Tipo de documento de aprobaci?n'] <- 'T_DOC_APROB'
+names(BD_INAF)[names(BD_INAF) == 'Fecha de aprobaci?n'] <- 'F_APROB'
 names(BD_INAF)[names(BD_INAF) == 'Archivos registrados'] <- 'N_ARCH'
 names(BD_INAF)[names(BD_INAF) == 'Estado'] <- 'ESTADO'
 names(BD_INAF)[names(BD_INAF) == 'Usuario de registro'] <- 'REGISTRADOR'
@@ -114,12 +114,12 @@ BD_INAF$ESTADO=gsub("\n", "", BD_INAF$ESTADO)
 
 #REEMPLAZAR LOS VALORES POR VALORES UN POCO MAS SIMPLES DE LEER
 BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Electricidad"]="CELE"
-BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Minería"]="CMIN"
+BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Miner?a"]="CMIN"
 BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Hidrocarburos"]="CHID"
 BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Industria"]="CIND"
 BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Agricultura"]="CAGR"
-BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Pesquería"]="CPES"
-BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Residuos Sólidos"]="CRES"
+BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Pesquer?a"]="CPES"
+BD_INAF$SUB_SECT[BD_INAF$SUB_SECT=="Residuos S?lidos"]="CRES"
 
 
 BD_INAF$SUB_SECT_0[BD_INAF$SUB_SECT=="CELE"|BD_INAF$SUB_SECT=="CMIN"|BD_INAF$SUB_SECT=="CHID"]="DSEM"
@@ -127,15 +127,15 @@ BD_INAF$SUB_SECT_0[BD_INAF$SUB_SECT=="CIND"|BD_INAF$SUB_SECT=="CAGR"|BD_INAF$SUB
 BD_INAF$SUB_SECT_0[BD_INAF$SUB_SECT=="CRES"]="DSIS"
 
 
-BD_INAF$ETAPA[BD_INAF$ESTADO=="Pendiente de revisión"]="1) REGISTRADOR"
-BD_INAF$ETAPA[BD_INAF$ESTADO=="En revisión [Coordinador]"|BD_INAF$ESTADO=="Observado [Coordinador]"]="2) COORDINADOR"
-BD_INAF$ETAPA[BD_INAF$ESTADO=="En revisión [Especialista CSIG]"|BD_INAF$ESTADO=="Observado [Especialista CSIG]"|BD_INAF$ESTADO=="Validado [Especialista CSIG]"]="3) ESPECIALISTA CSIG"
+BD_INAF$ETAPA[BD_INAF$ESTADO=="Pendiente de revisi?n"]="1) REGISTRADOR"
+BD_INAF$ETAPA[BD_INAF$ESTADO=="En revisi?n [Coordinador]"|BD_INAF$ESTADO=="Observado [Coordinador]"]="2) COORDINADOR"
+BD_INAF$ETAPA[BD_INAF$ESTADO=="En revisi?n [Especialista CSIG]"|BD_INAF$ESTADO=="Observado [Especialista CSIG]"|BD_INAF$ESTADO=="Validado [Especialista CSIG]"]="3) ESPECIALISTA CSIG"
 
 
-BD_INAF$ESTADO[BD_INAF$ESTADO=="Pendiente de revisión"]="PENDIENTE DE REVISION"
-BD_INAF$ESTADO[BD_INAF$ESTADO=="En revisión [Coordinador]"]="EN REVISION"
+BD_INAF$ESTADO[BD_INAF$ESTADO=="Pendiente de revisi?n"]="PENDIENTE DE REVISION"
+BD_INAF$ESTADO[BD_INAF$ESTADO=="En revisi?n [Coordinador]"]="EN REVISION"
 BD_INAF$ESTADO[BD_INAF$ESTADO=="Observado [Coordinador]"]="OBSERVADO"
-BD_INAF$ESTADO[BD_INAF$ESTADO=="En revisión [Especialista CSIG]"]="EN REVISION"
+BD_INAF$ESTADO[BD_INAF$ESTADO=="En revisi?n [Especialista CSIG]"]="EN REVISION"
 BD_INAF$ESTADO[BD_INAF$ESTADO=="Observado [Especialista CSIG]"]="OBSERVADO"
 BD_INAF$ESTADO[BD_INAF$ESTADO=="Validado [Especialista CSIG]"]="VALIDADO"
 
@@ -159,7 +159,7 @@ BD_INAF$ESTADO[BD_INAF$ESTADO=="Validado [Especialista CSIG]"]="VALIDADO"
 # #DESCARGAR 
 # download.file(FUENTE,tp1,mode ="wb")
 # 
-# #SELECCIONAR LA PESTAÑA DEL TEMPORAL
+# #SELECCIONAR LA PESTA?A DEL TEMPORAL
 # UF_ADMIN<-read_xlsx(path = tp1, sheet = "UF_ADMIN")
 # 
 # 
@@ -167,10 +167,10 @@ BD_INAF$ESTADO[BD_INAF$ESTADO=="Validado [Especialista CSIG]"]="VALIDADO"
 # UF_ADMIN <- UF_ADMIN[ ,-c(1,3:4,6:11,16:19,23)]
 # 
 # #RENOMBRANDO VARIABLES
-# names(UF_ADMIN)[names(UF_ADMIN) == 'CÓDIGO'] <- 'COD_ADM'
-# names(UF_ADMIN)[names(UF_ADMIN) == 'NOMBRE O RAZÓN SOCIAL'] <- 'NOM_ADM'
+# names(UF_ADMIN)[names(UF_ADMIN) == 'C?DIGO'] <- 'COD_ADM'
+# names(UF_ADMIN)[names(UF_ADMIN) == 'NOMBRE O RAZ?N SOCIAL'] <- 'NOM_ADM'
 # names(UF_ADMIN)[names(UF_ADMIN) == 'NOMBRE'] <- 'NOM_UF'
-# names(UF_ADMIN)[names(UF_ADMIN) == 'CÓDIGO OEFA'] <- 'COD_UF'
+# names(UF_ADMIN)[names(UF_ADMIN) == 'C?DIGO OEFA'] <- 'COD_UF'
 # names(UF_ADMIN)[names(UF_ADMIN) == 'DEPARTAMENTO3'] <- 'DEP'
 # names(UF_ADMIN)[names(UF_ADMIN) == 'PROVINCIA4'] <- 'PROV'
 # names(UF_ADMIN)[names(UF_ADMIN) == 'DISTRITO5'] <- 'DIST'
@@ -195,7 +195,7 @@ tp1<-tempfile()
 #DESCARGAR 
 download.file(FUENTE,tp1,mode ="wb")
 
-#SELECCIONAR LA PESTAÑA DEL TEMPORAL
+#SELECCIONAR LA PESTA?A DEL TEMPORAL
 BD_CRITICAS<-read_xlsx(path = tp1, sheet = "ORIGINAL")
 
 
@@ -207,18 +207,18 @@ names(BD_CRITICAS)[names(BD_CRITICAS) == 'ADMINISTRADO (SEGUN INAF)'] <- 'NOM_AD
 names(BD_CRITICAS)[names(BD_CRITICAS) == 'CODIGO DEL ADMINISTRADO'] <- 'COD_ADM'
 names(BD_CRITICAS)[names(BD_CRITICAS) == 'UNIDAD FISCALIZABLE (SEGUN INAF)'] <- 'NOM_UF'
 names(BD_CRITICAS)[names(BD_CRITICAS) == 'CODIGO DE LA UNIDAD FISCALIZABLE'] <- 'COD_UF'
-names(BD_CRITICAS)[names(BD_CRITICAS) == 'BREVE DESCRIPCIÓN (OPCIONAL)'] <- 'DESCRIP'
+names(BD_CRITICAS)[names(BD_CRITICAS) == 'BREVE DESCRIPCI?N (OPCIONAL)'] <- 'DESCRIP'
 #names(BD_CRITICAS)[names(BD_CRITICAS) == 'PROVINCIA4'] <- 'PROV'
 
 
 #REEMPLAZAR LOS VALORES POR VALORES UN POCO MAS SIMPLES DE LEER
 BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Electricidad"]="CELE"
-BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Minería"]="CMIN"
+BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Miner?a"]="CMIN"
 BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Hidrocarburos"]="CHID"
 BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Industria"]="CIND"
 BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Agricultura"]="CAGR"
 BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Pesca"]="CPES"
-BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Residuos Sólidos"]="CRES"
+BD_CRITICAS$SUBSECTOR[BD_CRITICAS$SUBSECTOR=="Residuos S?lidos"]="CRES"
 
 
 
@@ -292,7 +292,7 @@ SUB_BD_INAF$AUX=1
 #CREAR TABLA RESUMEN
 SUB_BD_INAF=summaryBy(AUX ~ F_REG, FUN=fun1, data =as.data.frame(SUB_BD_INAF),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
 
-# #GRÁFICO EN NIVELES
+# #GR?FICO EN NIVELES
 # AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, AUX)) +
 #   geom_line(color=OEFA_1, size=1.5) +
 #   #stat_smooth(se=FALSE)+
@@ -300,13 +300,13 @@ SUB_BD_INAF=summaryBy(AUX ~ F_REG, FUN=fun1, data =as.data.frame(SUB_BD_INAF),ke
 #   theme_minimal()+
 #   labs(x="",
 #        y="Cantidad de registros",
-#        title = "Evolución de la cantidad de registros en INAF.",
+#        title = "Evoluci?n de la cantidad de registros en INAF.",
 #        subtitle = paste("(Del ",
 #                         fecha_inicio,
 #                         " al ",
 #                         fecha_final,
 #                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")
+#        caption = "Fuente: INAF\nElaboraci?n: Propia")
 #   #theme(legend.position="none")
 #   #scale_fill_manual(values=c(OEFA_1,OEFA_2,OEFA_3,OEFA_4,OEFA_5,OEFA_6,OEFA_7,OEFA_1,OEFA_2))+
 #   
@@ -326,7 +326,7 @@ SUB_BD_INAF=summaryBy(AUX ~ F_REG, FUN=fun1, data =as.data.frame(SUB_BD_INAF),ke
 
 
 
-#GRÁFICO ACUMULADO
+#GR?FICO ACUMULADO
 AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, cumsum(AUX))) +
   geom_line(color=OEFA_1, size=1.5) +
   #stat_smooth(se=FALSE)+
@@ -334,13 +334,13 @@ AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, cumsum(AUX))) +
   theme_minimal()+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de registros en INAF (Acumulado).",
+       title = "Evoluci?n de la cantidad de registros en INAF (Acumulado).",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia")+
   ggeasy::easy_rotate_x_labels(angle = 90)
 #theme(legend.position="none")
 #scale_fill_manual(values=c(OEFA_1,OEFA_2,OEFA_3,OEFA_4,OEFA_5,OEFA_6,OEFA_7,OEFA_1,OEFA_2))+
@@ -375,7 +375,7 @@ SUB_BD_INAF_2$AUX=1
 #CREAR TABLA RESUMEN
 SUB_BD_INAF_2=summaryBy(AUX ~ F_REG, FUN=fun1, data =as.data.frame(SUB_BD_INAF_2),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
 
-#GRÁFICO ACUMULADO SOLO UF CRITICAS
+#GR?FICO ACUMULADO SOLO UF CRITICAS
 AVANCE_REG_DIA_TOT_UF_CRIT <- ggplot(SUB_BD_INAF_2,aes(F_REG, cumsum(AUX))) +
   geom_line(color=OEFA_3, size=1.5) +
   #stat_smooth(se=FALSE)+
@@ -383,13 +383,13 @@ AVANCE_REG_DIA_TOT_UF_CRIT <- ggplot(SUB_BD_INAF_2,aes(F_REG, cumsum(AUX))) +
   theme_minimal()+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de registros en INAF relacionados a UFC*(Acumulado).",
+       title = "Evoluci?n de la cantidad de registros en INAF relacionados a UFC*(Acumulado).",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia\n*UFC: Unidades Fiscalizables Críticas")
+       caption = "Fuente: INAF\nElaboraci?n: Propia\n*UFC: Unidades Fiscalizables Cr?ticas")
 #theme(legend.position="none")
 #scale_fill_manual(values=c(OEFA_1,OEFA_2,OEFA_3,OEFA_4,OEFA_5,OEFA_6,OEFA_7,OEFA_1,OEFA_2))+
 
@@ -424,10 +424,10 @@ SUB_BD_INAF_3=summaryBy(AUX ~ F_REG+UF_CRITICA, FUN=fun1, data =as.data.frame(SU
 #CREANDO CAMPO CONTEO ACUMULADO
 SUB_BD_INAF_3 = mutate(group_by(SUB_BD_INAF_3,UF_CRITICA),"AUX2" = cumsum(AUX))
 
-#GRÁFICO ACUMULADO
+#GR?FICO ACUMULADO
 AVANCE_REG_DIA_TOT_Y_UFC <- ggplot(SUB_BD_INAF_3,aes(F_REG, AUX2, group = UF_CRITICA, color = factor(UF_CRITICA))) +
   geom_line(size=1.5) +
-  scale_color_manual(values=c(OEFA_1,OEFA_3),labels=c("Totales","UF Críticas"),
+  scale_color_manual(values=c(OEFA_1,OEFA_3),labels=c("Totales","UF Cr?ticas"),
                      name = "")+
 
   #stat_smooth(se=FALSE)+
@@ -435,13 +435,13 @@ AVANCE_REG_DIA_TOT_Y_UFC <- ggplot(SUB_BD_INAF_3,aes(F_REG, AUX2, group = UF_CRI
   theme(legend.position="top")+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de registros en INAF (Acumulado).",
+       title = "Evoluci?n de la cantidad de registros en INAF (Acumulado).",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia")
+       caption = "Fuente: INAF\nElaboraci?n: Propia")
 
 AVANCE_REG_DIA_TOT_Y_UFC
 
@@ -463,7 +463,7 @@ anim_save("3) Avance acumulado Totales y UFC.gif")
 #############################################################################################################################################################
 
 #######################################################################
-#####  Graficando avances 1: Registros totales, por coordinación  #####
+#####  Graficando avances 1: Registros totales, por coordinaci?n  #####
 #######################################################################
 
 #GENERANDO LA NUEVA BD
@@ -483,13 +483,13 @@ AVANCE_REG_DIA <- ggplot(SUB_BD_INAF1,aes(F_REG, AUX2, group = SUB_SECT, color =
   theme_minimal()+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de registros en INAF,\npor coordinación (Acumulado).",
+       title = "Evoluci?n de la cantidad de registros en INAF,\npor coordinaci?n (Acumulado).",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia")+
   theme(legend.position = "bottom",legend.title = element_blank())
   
 AVANCE_REG_DIA
@@ -502,7 +502,7 @@ AVANCE_REG_DIA=AVANCE_REG_DIA + transition_reveal(F_REG)#+
 
 animate(AVANCE_REG_DIA, duration = 8, fps = 15, width = 2200, height = 1600, res=250, renderer = gifski_renderer())
 
-anim_save("4) Evolución por area.gif")
+anim_save("4) Evoluci?n por area.gif")
 
 
 
@@ -528,20 +528,20 @@ SUB_BD_INAF2=summaryBy(AUX ~ F_REG+SUB_SECT, FUN=c(fun1), data =as.data.frame(SU
 SUB_BD_INAF2 = mutate(group_by(SUB_BD_INAF2,SUB_SECT),"AUX2" = cumsum(AUX))
 
 
-#GENERANDO GRÁFICO EN NIVELES
+#GENERANDO GR?FICO EN NIVELES
 AVANCE_UF_DIA <- ggplot(SUB_BD_INAF2,aes(F_REG, AUX, group = SUB_SECT, color = factor(SUB_SECT))) +
   geom_line(size=1.5) +
   scale_color_manual(values=c(OEFA_1,OEFA_3,OEFA_6,OEFA_5, OEFA_7, OEFA_4))+
   theme_minimal()+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de Unidades Fiscalizables registradas en INAF con al menos un IGA,\npor coordinación.",
+       title = "Evoluci?n de la cantidad de Unidades Fiscalizables registradas en INAF con al menos un IGA,\npor coordinaci?n.",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia")+
   theme(legend.position = "bottom",legend.title = element_blank())
 AVANCE_UF_DIA
 
@@ -558,20 +558,20 @@ anim_save("G3_Niveles.gif")
 
 
 
-#GENERANDO GRÁFICO ACUMULADO
+#GENERANDO GR?FICO ACUMULADO
 AVANCE_UF_DIA <- ggplot(SUB_BD_INAF2,aes(F_REG, AUX2, group = SUB_SECT, color = factor(SUB_SECT))) +
   geom_line(size=1.5) +
   scale_color_manual(values=c(OEFA_1,OEFA_3,OEFA_6,OEFA_5, OEFA_7, OEFA_4))+
   theme_minimal()+
   labs(x="",
        y="Cantidad de registros",
-       title = "Evolución de la cantidad de Unidades Fiscalizables registradas en INAF con al menos un IGA,\npor coordinación. (Acumulado)",
+       title = "Evoluci?n de la cantidad de Unidades Fiscalizables registradas en INAF con al menos un IGA,\npor coordinaci?n. (Acumulado)",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia")+
   theme(legend.position = "bottom",legend.title = element_blank())
 AVANCE_UF_DIA
 
@@ -616,13 +616,13 @@ AVANCE_REG_PERCAP_DIA <- ggplot(SUB_BD_INAF3,aes(F_REG, (REGISTROS_PERCAP), grou
   ylim(0,30)+
   labs(x="",
        y="Cantidad de registros por registrador",
-       title = "Evolución de la cantidad de registros per cápita* en INAF, por coordinación**.",
+       title = "Evoluci?n de la cantidad de registros per c?pita* en INAF, por coordinaci?n**.",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realizó la migración de información del DRIVE generando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realiz? la migraci?n de informaci?n del DRIVE generando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
   theme(legend.position = "bottom",legend.title = element_blank())+
   facet_wrap(.~SUB_SECT, 
              scales="free_x",
@@ -645,7 +645,7 @@ AVANCE_REG_PERCAP_DIA=AVANCE_REG_PERCAP_DIA + transition_reveal(F_REG)#+
 animate(AVANCE_REG_PERCAP_DIA, duration = 8, fps = 15, width = 2800, height = 1600, res=250, renderer = gifski_renderer())
 
 # Save at gif:
-anim_save("5) Llenado per cápita por área.gif")
+anim_save("5) Llenado per c?pita por ?rea.gif")
 
 
 # png(filename=paste(path,"/hires.png",sep=""), width=5, height=5,
@@ -679,13 +679,13 @@ AVANCE_REG_PERCAP_DIA <- ggplot(SUB_BD_INAF5,aes(F_REG, (REGISTROS_PERCAP), grou
   ylim(0,30)+
   labs(x="",
        y="Cantidad de registros por registrador",
-       title = "Evolución de la cantidad de registros per cápita* en INAF, por coordinación**.",
+       title = "Evoluci?n de la cantidad de registros per c?pita* en INAF, por coordinaci?n**.",
        subtitle = paste("(Del ",
                         fecha_inicio,
                         " al ",
                         fecha_final,
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realizó la migración de información del DRIVE generando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
+       caption = "Fuente: INAF\nElaboraci?n: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realiz? la migraci?n de informaci?n del DRIVE generando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
   theme(legend.position = "bottom",legend.title = element_blank())+
   facet_wrap(.~SUB_SECT, 
              scales="free_x",
@@ -696,7 +696,7 @@ AVANCE_REG_PERCAP_DIA <- ggplot(SUB_BD_INAF5,aes(F_REG, (REGISTROS_PERCAP), grou
 
 AVANCE_REG_PERCAP_DIA
 
-ggsave("8) Tendencia llenado per cápita por área.jpg",  width = 12, height = 7)
+ggsave("8) Tendencia llenado per c?pita por ?rea.jpg",  width = 12, height = 7)
 
 ########################################################
 #####  Graficando avances 3: REGISTROS PER CAPITA  #####
@@ -717,14 +717,14 @@ SUB_BD_INAF4$Etapa[SUB_BD_INAF4$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF4$Etapa[SUB_BD_INAF4$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF4$Etapa[SUB_BD_INAF4$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF4$Estado[SUB_BD_INAF4$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF4$Estado[SUB_BD_INAF4$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF4$Estado[SUB_BD_INAF4$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF4$Estado[SUB_BD_INAF4$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF4$Estado[SUB_BD_INAF4$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -736,24 +736,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF4[2,3]+SUB_BD_INAF4[3,3]+SUB_BD_INAF4[4,3]+SUB_BD_INAF4[5,3]+SUB_BD_INAF4[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF4[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF4[2,3]+SUB_BD_INAF4[3,3]+SUB_BD_INAF4[4,3]+SUB_BD_INAF4[5,3]+SUB_BD_INAF4[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF4[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF4[4,3]+SUB_BD_INAF4[5,3]+SUB_BD_INAF4[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF4[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF4[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF4[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF4[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF4[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF4[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF4[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF4[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF4[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -812,14 +812,14 @@ SUB_BD_INAF6$Etapa[SUB_BD_INAF6$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF6$Etapa[SUB_BD_INAF6$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF6$Etapa[SUB_BD_INAF6$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF6$Estado[SUB_BD_INAF6$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF6$Estado[SUB_BD_INAF6$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF6$Estado[SUB_BD_INAF6$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF6$Estado[SUB_BD_INAF6$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF6$Estado[SUB_BD_INAF6$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -831,24 +831,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF6[2,3]+SUB_BD_INAF6[3,3]+SUB_BD_INAF6[4,3]+SUB_BD_INAF6[5,3]+SUB_BD_INAF6[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF6[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF6[2,3]+SUB_BD_INAF6[3,3]+SUB_BD_INAF6[4,3]+SUB_BD_INAF6[5,3]+SUB_BD_INAF6[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF6[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF6[4,3]+SUB_BD_INAF6[5,3]+SUB_BD_INAF6[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF6[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF6[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF6[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF6[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF6[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF6[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF6[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF6[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF6[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -906,14 +906,14 @@ SUB_BD_INAF7$Etapa[SUB_BD_INAF7$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF7$Etapa[SUB_BD_INAF7$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF7$Etapa[SUB_BD_INAF7$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF7$Estado[SUB_BD_INAF7$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF7$Estado[SUB_BD_INAF7$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF7$Estado[SUB_BD_INAF7$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF7$Estado[SUB_BD_INAF7$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF7$Estado[SUB_BD_INAF7$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -925,24 +925,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF7[2,3]+SUB_BD_INAF7[3,3]+SUB_BD_INAF7[4,3]+SUB_BD_INAF7[5,3]+SUB_BD_INAF7[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF7[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF7[2,3]+SUB_BD_INAF7[3,3]+SUB_BD_INAF7[4,3]+SUB_BD_INAF7[5,3]+SUB_BD_INAF7[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF7[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF7[4,3]+SUB_BD_INAF7[5,3]+SUB_BD_INAF7[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF7[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF7[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF7[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF7[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF7[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF7[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF7[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF7[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF7[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -1000,14 +1000,14 @@ SUB_BD_INAF8$Etapa[SUB_BD_INAF8$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF8$Etapa[SUB_BD_INAF8$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF8$Etapa[SUB_BD_INAF8$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF8$Estado[SUB_BD_INAF8$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF8$Estado[SUB_BD_INAF8$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF8$Estado[SUB_BD_INAF8$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF8$Estado[SUB_BD_INAF8$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF8$Estado[SUB_BD_INAF8$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -1019,24 +1019,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF8[2,3]+SUB_BD_INAF8[3,3]+SUB_BD_INAF8[4,3]+SUB_BD_INAF8[5,3]+SUB_BD_INAF8[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF8[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF8[2,3]+SUB_BD_INAF8[3,3]+SUB_BD_INAF8[4,3]+SUB_BD_INAF8[5,3]+SUB_BD_INAF8[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF8[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF8[4,3]+SUB_BD_INAF8[5,3]+SUB_BD_INAF8[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF8[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF8[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF8[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF8[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF8[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF8[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF8[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF8[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF8[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -1094,14 +1094,14 @@ SUB_BD_INAF9$Etapa[SUB_BD_INAF9$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF9$Etapa[SUB_BD_INAF9$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF9$Etapa[SUB_BD_INAF9$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF9$Estado[SUB_BD_INAF9$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF9$Estado[SUB_BD_INAF9$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF9$Estado[SUB_BD_INAF9$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF9$Estado[SUB_BD_INAF9$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF9$Estado[SUB_BD_INAF9$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -1113,24 +1113,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF9[2,3]+SUB_BD_INAF9[3,3]+SUB_BD_INAF9[4,3]+SUB_BD_INAF9[5,3]+SUB_BD_INAF9[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF9[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF9[2,3]+SUB_BD_INAF9[3,3]+SUB_BD_INAF9[4,3]+SUB_BD_INAF9[5,3]+SUB_BD_INAF9[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF9[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF9[4,3]+SUB_BD_INAF9[5,3]+SUB_BD_INAF9[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF9[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF9[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF9[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF9[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF9[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF9[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF9[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF9[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF9[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -1188,14 +1188,14 @@ SUB_BD_INAF10$Etapa[SUB_BD_INAF10$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF10$Etapa[SUB_BD_INAF10$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF10$Etapa[SUB_BD_INAF10$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF10$Estado[SUB_BD_INAF10$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF10$Estado[SUB_BD_INAF10$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF10$Estado[SUB_BD_INAF10$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF10$Estado[SUB_BD_INAF10$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF10$Estado[SUB_BD_INAF10$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -1207,24 +1207,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF10[2,3]+SUB_BD_INAF10[3,3]+SUB_BD_INAF10[4,3]+SUB_BD_INAF10[5,3]+SUB_BD_INAF10[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF10[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF10[2,3]+SUB_BD_INAF10[3,3]+SUB_BD_INAF10[4,3]+SUB_BD_INAF10[5,3]+SUB_BD_INAF10[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF10[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF10[4,3]+SUB_BD_INAF10[5,3]+SUB_BD_INAF10[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF10[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF10[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF10[4,3], # Casos con revisión de Érika
-  3, 7, SUB_BD_INAF10[5,3], # Casos sin revisión de Érika
-  3, 8, SUB_BD_INAF10[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF10[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF10[4,3], # Casos con revisi?n de ?rika
+  3, 7, SUB_BD_INAF10[5,3], # Casos sin revisi?n de ?rika
+  3, 8, SUB_BD_INAF10[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 names(links) = c("source", "target", "value")
@@ -1286,14 +1286,14 @@ SUB_BD_INAF11$Etapa[SUB_BD_INAF11$Etapa=="1) REGISTRADOR"]="Registrador"
 SUB_BD_INAF11$Etapa[SUB_BD_INAF11$Etapa=="2) COORDINADOR"]="Coordinador"
 SUB_BD_INAF11$Etapa[SUB_BD_INAF11$Etapa=="3) ESPECIALISTA CSIG"]="CSIG"
 SUB_BD_INAF11$Estado[SUB_BD_INAF11$Estado=="PENDIENTE DE REVISION"]="Incompletos"
-SUB_BD_INAF11$Estado[SUB_BD_INAF11$Estado=="EN REVISION"]="En revisión"
+SUB_BD_INAF11$Estado[SUB_BD_INAF11$Estado=="EN REVISION"]="En revisi?n"
 SUB_BD_INAF11$Estado[SUB_BD_INAF11$Estado=="OBSERVADO"]="Observado"
 SUB_BD_INAF11$Estado[SUB_BD_INAF11$Estado=="VALIDADO"]="Validado"
 
 
 
 #############################################
-#####  GRÁFICO DE SANKEY (PORCENTAJES)  #####
+#####  GR?FICO DE SANKEY (PORCENTAJES)  #####
 #############################################
 
 
@@ -1305,24 +1305,24 @@ nodes = data.frame("name" =
                        "Pendientes de completar", #Segundo nivel (2)
                        
                        "Aprobado", #Tercer nivel (3)
-                       "En revisión", #Tercer nivel (4)
+                       "En revisi?n", #Tercer nivel (4)
                        "Observados", #Tercer nivel (5)
                        
-                       "En revisión", #Cuarto nivel (6)
+                       "En revisi?n", #Cuarto nivel (6)
                        "Observados", #Cuarto nivel (7)
                        "Validado")) #Cuarto nivel (8)
 
 # COL=nrow(CMIN)
 
 links=as.data.frame(matrix(c(
-  0, 1, SUB_BD_INAF11[2,3]+SUB_BD_INAF11[3,3]+SUB_BD_INAF11[4,3]+SUB_BD_INAF11[5,3]+SUB_BD_INAF11[6,3], # Casos que tienen primera versión
-  0, 2, SUB_BD_INAF11[1,3], # Casos que no tienen primera versión.
+  0, 1, SUB_BD_INAF11[2,3]+SUB_BD_INAF11[3,3]+SUB_BD_INAF11[4,3]+SUB_BD_INAF11[5,3]+SUB_BD_INAF11[6,3], # Casos que tienen primera versi?n
+  0, 2, SUB_BD_INAF11[1,3], # Casos que no tienen primera versi?n.
   1, 3, SUB_BD_INAF11[4,3]+SUB_BD_INAF11[5,3]+SUB_BD_INAF11[6,3], # Cantidad de casos archivados.
   1, 4, SUB_BD_INAF11[2,3], # Casos con version final
-  1, 5, SUB_BD_INAF11[3,3], # Casos sin verión final
-  3, 6, SUB_BD_INAF11[4,3], # Casos con revisión de Érika
-  3, 8, SUB_BD_INAF11[5,3], # Casos sin revisión de Érika
-  3, 7, SUB_BD_INAF11[6,3]), # Casos con cargo (Revisión de CMIN/DSEM)
+  1, 5, SUB_BD_INAF11[3,3], # Casos sin veri?n final
+  3, 6, SUB_BD_INAF11[4,3], # Casos con revisi?n de ?rika
+  3, 8, SUB_BD_INAF11[5,3], # Casos sin revisi?n de ?rika
+  3, 7, SUB_BD_INAF11[6,3]), # Casos con cargo (Revisi?n de CMIN/DSEM)
   byrow = T, ncol = 3))
 
 
