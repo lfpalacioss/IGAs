@@ -44,7 +44,10 @@ if (exists("AUTORIZACION")==TRUE) {
 
 
 # SOLICITAR LA AUTORIZACIÓN
-AUTORIZACION= askYesNo("¿Desea pre procesar y subir la data a Drive?", default = TRUE,prompts = getOption("askYesNo", gettext(c("SÍ", "NO", "CANCELAR"))))
+AUTORIZACION = askYesNo("¿Desea pre procesar y subir la data a Drive?", 
+                       default = TRUE,
+                       prompts = getOption("askYesNo", gettext(c("SÍ", "NO", "CANCELAR")))
+                       )
 
 
 #EJECUTAR COMANDO DE ACTUALIZACIÓN
@@ -956,7 +959,7 @@ SUB_BD_HISTORIAL_2= BD_HISTORIAL %>%
 #GENERANDO GRÁFICO 1, PARTE 1
 GRAF_IGA_TIPO_1=SUB_BD_HISTORIAL_2 %>%
   ggplot(aes(x=F_SEMANA, y=(VALIDADO), group = 1))+
-  geom_line(color=OEFA.TURQUEZA, size=1.5)+
+  geom_line(color=PALETA.PRINCIPAL[4], size=1.5)+
   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
   labs(x="Fecha de entrada del IGA a CSIG",
@@ -982,7 +985,7 @@ GRAF_IGA_TIPO_1
 #GENERANDO GRÁFICO 1, PARTE 2
 GRAF_IGA_TIPO_2=SUB_BD_HISTORIAL_2 %>%
   ggplot(aes(x=F_SEMANA, y=(OBSERVADO), group = 1))+
-  geom_line(color=OEFA.AZUL1, size=1.5)+
+  geom_line(color=PALETA.PRINCIPAL[1], size=1.5)+
   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
   labs(x="Fecha de entrada del IGA a CSIG",
@@ -1082,7 +1085,7 @@ TAB_PIFA=formattable(PIFA, align=c("l","c"),
               list(`Indicator Name` = formatter("span",
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   `IGAS`=color_tile("white", OEFA.MORADO)))
+                   `IGAS`=color_tile("white", PALETA.SECUNDARIA[3])))
 
 TAB_PIFA
 
@@ -1996,7 +1999,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.MOSTAZA)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[7])))
 
 TAB1
 
@@ -2135,7 +2138,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.TURQUEZA)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[4])))
 
 TAB1
 
@@ -2262,7 +2265,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.AZUL2)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[2])))
 
 TAB1
 
@@ -2392,7 +2395,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.VERDE)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[5])))
 
 TAB1
 
@@ -2527,7 +2530,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.JADE)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[3])))
 
 TAB1
 
@@ -2663,7 +2666,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.GRIS)))
+                   Registros=color_tile("white", PALETA.PRINCIPAL[6])))
 
 TAB1
 
@@ -2783,6 +2786,7 @@ SANK1=sankeyNetwork(Links = links, Nodes = nodes,
 
 SANK1
 
+
 #GRABANDO
 saveNetwork(SANK1, "SANK1.html") #Crea un archivo html "temporal" (xq nosotros lo eliminaremos al final)
 webshot("SANK1.html", "5.7) SANKEY-CAGR.jpeg",vwidth = 1200,vheight = 900) #Guarda el archivo 
@@ -2799,7 +2803,7 @@ TAB1=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   Registros=color_tile("white", OEFA.NARANJA)))
+                   Registros=color_tile("white", PALETA.SECUNDARIA[5])))
 
 TAB1
 
@@ -2964,14 +2968,14 @@ TAB_TOT=
               list(`Indicator Name` = formatter("span", 
                                                 style = ~ style(color = "grey",
                                                                 font.weight = "bold")),
-                   `Registros CMIN`=color_tile("white", OEFA.ROJO),
-                   `Registros CELE`=color_tile("white", OEFA.ROJO),
-                   `Registros CHID`=color_tile("white", OEFA.ROJO),
-                   `Registros CIND`=color_tile("white", OEFA.ROJO),
-                   `Registros CPES`=color_tile("white", OEFA.ROJO),
-                   `Registros CRES`=color_tile("white", OEFA.ROJO),
-                   `Registros CAGR`=color_tile("white", OEFA.ROJO),
-                   `Registros totales`=color_tile("white", OEFA.AZUL2)))
+                   `Registros CMIN`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CELE`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CHID`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CIND`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CPES`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CRES`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros CAGR`=color_tile("white", PALETA.SECUNDARIA[6]),
+                   `Registros totales`=color_tile("white", PALETA.PRINCIPAL[2])))
 
 TAB_TOT
 
@@ -3104,27 +3108,13 @@ TAB_TOT_CLAUD=rename(TAB_TOT_CLAUD, "Área"=E_E)
                    # `CSIG (En revisión)`=color_tile("white", OEFA.ROJO),
                    # `CSIG (Observado)`=color_tile("white", OEFA.ROJO),
                    # `CSIG (Validado)`=color_tile("white", OEFA.ROJO),
-                   `% de avance`=color_tile("white", OEFA.AZUL2)))
+                   `% de avance`=color_tile("white", PALETA.PRINCIPAL[2])))
                    
                    # area(row,col = 2) ~ color_tile("white", OEFA.ROJO)))
 # 
   TAB_TOT_CLAUD
 
   
-  
-  
-  
-  
-  formattable(prevalence, align = c("l",rep("r", NCOL(prevalence) - 1)), 
-              list(`Indicator Name` = formatter("span", 
-                                                style = ~ style(color = "grey",
-                                                                font.weight = "bold")), 
-                   area(col = 2:7) ~ color_tile("#DeF7E9", "#71CA97")))
-  
-  
-  
-
-
 #GRABANDO
 html_header="
 <head> 
