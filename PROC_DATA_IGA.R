@@ -8,7 +8,6 @@
 ##      0) CARGANDO CONFIGURACIONES      ####
 ## ##################################### ###
 
-
 # CARGANDO LAS CONEXIONES DE ORACLE
 # jdbcDriver =JDBC("oracle.jdbc.OracleDriver",classPath="D:/Oracle/ojdbc7.jar")
 # jdbcConnection =dbConnect(jdbcDriver, "jdbc:oracle:thin:@//orclnod-cluster-scan:1534/BIOEFABD", "STGPORTAL", "aZMYYq97FkRE")
@@ -23,7 +22,6 @@ googlesheets4::gs4_auth(
   token = NULL
 )
 
-
 ## #########################################
 
 
@@ -33,8 +31,6 @@ googlesheets4::gs4_auth(
 ## ########################################### ###
 ##      I) CARGANDO LA DATA DEL HISTORIAL      ####
 ## ########################################### ###
-
-
 
 # ------------------- ---
 #   CARGANDO LA DATA     
@@ -118,28 +114,6 @@ rm(BD_HISTORIAL)
 
 #PAUSANDO
 pause(5)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -337,6 +311,63 @@ pause(5)
 
 
 
+# ____________________________________________________________________________________________________________________________________
+
+## ################################### ###
+##      IV) CARGANDO LA DATA IGAS      ####
+## ################################### ###
+
+#FUENTE
+NOMB_EXC='AdminUF.RData'
+# FUENTE_PRE_ADM_UF<- paste('C:/Users/',USER,'/Google Drive/4) R/2) BD/1) OEFA/2) IGAs/1) INPUTS/',NOMB_EXC,sep = "")
+FUENTE_PRE_ADM_UF<- paste('C:/Users/',USER,'/Google Drive/4) R/2) BD/1) OEFA/2) IGAs/1) INPUTS/',NOMB_EXC,sep = "")
+
+#CARGAR LA DATA ORIGINAL
+PRE_BD_ADM_UF = get(load(FUENTE_PRE_ADM_UF))
+
+
+#___________________________________________________________
+
+# ====================================== ===
+#   AGREGANDO LOS ENCABEZADOS DEL RIVE   ===
+# ====================================== ===
+
+#FUENTE
+FUENTE_IGAS<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdvKvyxqdRnyvkFngDf9SGvBZVZt9aHygcq6JWgMUVeDxJE6QqsgTCwsSdhq0xFQvMSLYOT1-XifxV/pub?output=xlsx"
+
+#SETEANDO LA DIRECCION DEL DRIVE
+# archivo='IGAS_INAF.csv'
+
+#GENERANDO UN TEMPORAL
+tp1<-tempfile()
+
+#DESCARGAR
+download.file(FUENTE_IGAS,tp1,mode ="wb")
+
+#SELECCIONAR LA PESTA?A DEL TEMPORAL
+ENCABEZADOS<-read_xlsx(path = tp1, sheet = "DIC_DATOS")
+ENCABEZADOS=ENCABEZADOS[ENCABEZADOS$INFO_IRRELEV==0, ]
+ENCABEZADOS=as.list(ENCABEZADOS)
+PRE_BD_ADM_UF=subset(PRE_BD_ADM_UF, select = ENCABEZADOS$ENCABEZADOS) #Limito los campos con los que se trabajar?
+colnames(PRE_BD_ADM_UF)=ENCABEZADOS$COD_ENCAB
+
+
+#___________________________________________________________
+
+# ========================== ===
+#   CARGANDO DATA AL DRIVE   ===
+# ========================== ===
+
+#SE PEGA EN LA NUEVA PESTA?A (PREVIAMENTE CREADA) DIRECTAMENTE EN EL DRIVE PARA JALAR LA DATA PROCESADA
+googlesheets4::sheet_write(data =PRE_BD_ADM_UF, ss="https://docs.google.com/spreadsheets/d/1Y_4q0ok_LOQp5WLUs3WWda7OWLUWD1YEC8nh3iYza5k/edit?usp=sharing", sheet = "BD_ADM_UF")
+
+rm(AdminUF_R, PRE_BD_ADM_UF, FUENTE)
+
+##########################################
+
+
+
+
 
 # ____________________________________________________________________________________________________________________________________
 
@@ -346,6 +377,7 @@ pause(5)
 
 # rm(jdbcConnection)
 # rm(jdbcDriver)
+rm(FUENTE_IGAS, FUENTE_PRE_ADM_UF, NOMB_EXC,tp1)
 rm(ENCABEZADOS)
 
 

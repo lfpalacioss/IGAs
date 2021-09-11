@@ -33,107 +33,85 @@ library(profvis)
 
 # __________________________________________________________________________________________________________________________________________________________
 
-## ################################## ###
-##    II) PROCESAMIENTO DE PRE-DATA   ####
-## ################################## ###
+## ####################################### ###
+##    II) CARGAR DATA Y/O SUBIR AL DRIVE   ####
+## ####################################### ###
 
-# VERIFICAR SI EXISTE EL COMANDO DE AUTORIZACIÓN
-if (exists("AUTORIZACION")==TRUE) {
-  rm(AUTORIZACION) #source(paste('C:/Users/',USER,'/Google Drive/4) R/1) Scripts/1) OEFA/3) IGAS/PROC_DATA_IGA.R',sep = ""), encoding="utf-8")
-} 
+source(paste('C:/Users/',USER,'/Google Drive/4) R/1) Scripts/1) OEFA/3) IGAS/PROC_DATA_IGA_oooo.R',sep = ""), encoding="utf-8")
 
-
-# SOLICITAR LA AUTORIZACIÓN
-AUTORIZACION = askYesNo("¿Desea pre procesar y subir la data a Drive?", 
-                       default = TRUE,
-                       prompts = getOption("askYesNo", gettext(c("SÍ", "NO", "CANCELAR")))
-                       )
-
-
-#EJECUTAR COMANDO DE ACTUALIZACIÓN
-if (AUTORIZACION==TRUE & is.na(AUTORIZACION)==FALSE) {
-  source(paste('C:/Users/',USER,'/Google Drive/4) R/1) Scripts/1) OEFA/3) IGAS/PROC_DATA_IGA.R',sep = ""), encoding="utf-8")
-} else if (AUTORIZACION==FALSE& is.na(AUTORIZACION)==FALSE) {
-  message("NO SE HA REALIZADO LA CARGA DE DATOS A DRIVE")
-  } else {
-    stop("SE HA CANCELADO EL PROCESO", call. = FALSE)
-      }
-  
-
-
-#########################################
+##############################################
 
 
 
 # __________________________________________________________________________________________________________________________________________________________
 
-## ################################# ###
-##    III) CARGAR Y TRABAJAR DATA    ####
-## ################################# ###
+## ###################################### ###
+##    III) CRUCES Y TABLAS INTERMEDIAS    ####
+## ###################################### ###
 
 
 # -------- -
 # BD IGAS 
 # -------- -
 
-# FUENTE
-FUENTE_IGAS<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRafB2LaFQ0YIPfK5j1ofCaBz4oRz3-1Jqt3c9UST-WnJ7j2D0tbEMsPhTDBd5qhlk6gnnCXlw_CQDy/pub?output=xlsx"
-# SETEANDO LA DIRECCION DEL DRIVE
-archivo='IGAS_INAF.csv'
-# GENERANDO UN TEMPORAL
-tp1<-tempfile()
-# DESCARGAR
-download.file(FUENTE_IGAS,tp1,mode ="wb")
-# SELECCIONAR LA PESTA?A DEL TEMPORAL
-BD_INAF<-read_xlsx(path = tp1, sheet = "BD_INAF")
+# # FUENTE
+# FUENTE_IGAS<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRafB2LaFQ0YIPfK5j1ofCaBz4oRz3-1Jqt3c9UST-WnJ7j2D0tbEMsPhTDBd5qhlk6gnnCXlw_CQDy/pub?output=xlsx"
+# # SETEANDO LA DIRECCION DEL DRIVE
+# archivo='IGAS_INAF.csv'
+# # GENERANDO UN TEMPORAL
+# tp1<-tempfile()
+# # DESCARGAR
+# download.file(FUENTE_IGAS,tp1,mode ="wb")
+# # SELECCIONAR LA PESTA?A DEL TEMPORAL
+# BD_INAF<-read_xlsx(path = tp1, sheet = "BD_INAF")
+# 
+# 
+# #ELIMINAR UNA VARIABLE
+# BD_INAF=BD_INAF %>%
+#   subset(select = -c(Certificador,`Consultora ambiental`, `N° Documento de aprobación`)) %>%
+#   as.data.frame() %>%
+#   subset(is.na(`Nombre del instrumento`)==F)
 
 
-#ELIMINAR UNA VARIABLE
-BD_INAF=BD_INAF %>%
-  subset(select = -c(Certificador,`Consultora ambiental`, `N° Documento de aprobación`)) %>%
-  as.data.frame() %>%
-  subset(is.na(`Nombre del instrumento`)==F)
-
-
-#RENOMBRANDO VARIABLES
-names(BD_INAF)[names(BD_INAF) == 'Nombre del instrumento'] <- 'N_INST'
-names(BD_INAF)[names(BD_INAF) == 'Administrado'] <- 'ADM_ACT'
-names(BD_INAF)[names(BD_INAF) == 'Administrado original'] <- 'ADM_ORIG'
-names(BD_INAF)[names(BD_INAF) == 'Unidad fiscalizable'] <- 'UF'
-names(BD_INAF)[names(BD_INAF) == 'Subsector'] <- 'SUB_SECT'
-names(BD_INAF)[names(BD_INAF) == 'Tipo de documento de aprobación'] <- 'T_DOC_APROB'
-names(BD_INAF)[names(BD_INAF) == 'Fecha de aprobación'] <- 'F_APROB'
-names(BD_INAF)[names(BD_INAF) == 'Archivos registrados'] <- 'N_ARCH'
-names(BD_INAF)[names(BD_INAF) == 'Estado'] <- 'ESTADO'
-names(BD_INAF)[names(BD_INAF) == 'Usuario de registro'] <- 'REGISTRADOR'
-names(BD_INAF)[names(BD_INAF) == 'Fecha de registro'] <- 'F_REG'
-names(BD_INAF)[names(BD_INAF) == 'COD ADMINISTRADO'] <- 'COD_ADM'
-names(BD_INAF)[names(BD_INAF) == 'COD UF'] <- 'COD_UF'
+# #RENOMBRANDO VARIABLES
+# names(BD_INAF)[names(BD_INAF) == 'Nombre del instrumento'] <- 'N_INST'
+# names(BD_INAF)[names(BD_INAF) == 'Administrado'] <- 'ADM_ACT'
+# names(BD_INAF)[names(BD_INAF) == 'Administrado original'] <- 'ADM_ORIG'
+# names(BD_INAF)[names(BD_INAF) == 'Unidad fiscalizable'] <- 'UF'
+# names(BD_INAF)[names(BD_INAF) == 'Subsector'] <- 'SUB_SECT'
+# names(BD_INAF)[names(BD_INAF) == 'Tipo de documento de aprobación'] <- 'T_DOC_APROB'
+# names(BD_INAF)[names(BD_INAF) == 'Fecha de aprobación'] <- 'F_APROB'
+# names(BD_INAF)[names(BD_INAF) == 'Archivos registrados'] <- 'N_ARCH'
+# names(BD_INAF)[names(BD_INAF) == 'Estado'] <- 'ESTADO'
+# names(BD_INAF)[names(BD_INAF) == 'Usuario de registro'] <- 'REGISTRADOR'
+# names(BD_INAF)[names(BD_INAF) == 'Fecha de registro'] <- 'F_REG'
+# names(BD_INAF)[names(BD_INAF) == 'COD ADMINISTRADO'] <- 'COD_ADM'
+# names(BD_INAF)[names(BD_INAF) == 'COD UF'] <- 'COD_UF'
 
 
 
 #TRANSFORMANDO VARIABLES
-BD_INAF=BD_INAF %>%
-  mutate(ETAPA=NA, SUB_SECT_0=NA,ESTADO=gsub("\n", "", ESTADO)) %>%
-  mutate(SUB_SECT=case_when(SUB_SECT=="Electricidad"~"CELE",
-                            SUB_SECT=="Minería"~"CMIN",
-                            SUB_SECT=="Hidrocarburos"~"CHID",
-                            SUB_SECT=="Industria"~"CIND",
-                            SUB_SECT=="Agricultura"~"CAGR",
-                            SUB_SECT=="Pesquería"~"CPES",
-                            SUB_SECT=="Residuos Sólidos"~"CRES",
-                            SUB_SECT=="Hidrocarburos, Industria"~"CHID")) %>%
-  mutate(SUB_SECT_0=case_when(SUB_SECT=="CELE"|SUB_SECT=="CMIN"|SUB_SECT=="CHID"~"DSEM",
-                              SUB_SECT=="CIND"|SUB_SECT=="CAGR"|SUB_SECT=="CPES"~"DSAP",
-                              SUB_SECT=="CRES"~"DSIS")) %>%
-  mutate(ETAPA=case_when(is.na(ESTADO)==T~"1) REGISTRADOR",
-                         ESTADO=="En revisión [Revisor]"|ESTADO=="Observado [Revisor]"~"2) REVISOR",
-                         ESTADO=="En revisión [Calidad]"|ESTADO=="Observado [Calidad]"|ESTADO=="Validado [Calidad]"~"3) CSIG (CALIDAD)")) %>%
-  mutate(ESTADO=case_when(is.na(ESTADO)==T~"PENDIENTE DE REVISION",
-                          ESTADO=="En revisión [Calidad]"|ESTADO=="En revisión [Revisor]"~"EN REVISION",
-                          ESTADO=="Observado [Revisor]"|ESTADO=="Observado [Calidad]"~"OBSERVADO",
-                          ESTADO=="Validado [Calidad]"~"VALIDADO"))
- 
+# BD_INAF=BD_INAF %>%
+#   mutate(ETAPA=NA, SUB_SECT_0=NA,ESTADO=gsub("\n", "", ESTADO)) %>%
+#   mutate(SUB_SECT=case_when(SUB_SECT=="Electricidad"~"CELE",
+#                             SUB_SECT=="Minería"~"CMIN",
+#                             SUB_SECT=="Hidrocarburos"~"CHID",
+#                             SUB_SECT=="Industria"~"CIND",
+#                             SUB_SECT=="Agricultura"~"CAGR",
+#                             SUB_SECT=="Pesquería"~"CPES",
+#                             SUB_SECT=="Residuos Sólidos"~"CRES",
+#                             SUB_SECT=="Hidrocarburos, Industria"~"CHID")) %>%
+#   mutate(SUB_SECT_0=case_when(SUB_SECT=="CELE"|SUB_SECT=="CMIN"|SUB_SECT=="CHID"~"DSEM",
+#                               SUB_SECT=="CIND"|SUB_SECT=="CAGR"|SUB_SECT=="CPES"~"DSAP",
+#                               SUB_SECT=="CRES"~"DSIS")) %>%
+#   mutate(ETAPA=case_when(is.na(ESTADO)==T~"1) REGISTRADOR",
+#                          ESTADO=="En revisión [Revisor]"|ESTADO=="Observado [Revisor]"~"2) REVISOR",
+#                          ESTADO=="En revisión [Calidad]"|ESTADO=="Observado [Calidad]"|ESTADO=="Validado [Calidad]"~"3) CSIG (CALIDAD)")) %>%
+#   mutate(ESTADO=case_when(is.na(ESTADO)==T~"PENDIENTE DE REVISION",
+#                           ESTADO=="En revisión [Calidad]"|ESTADO=="En revisión [Revisor]"~"EN REVISION",
+#                           ESTADO=="Observado [Revisor]"|ESTADO=="Observado [Calidad]"~"OBSERVADO",
+#                           ESTADO=="Validado [Calidad]"~"VALIDADO"))
+#  
   
   
 
@@ -145,27 +123,27 @@ BD_INAF=BD_INAF %>%
 # BD UFC
 # ------- -
 
-#FUENTE
-FUENTE_UFC= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQeH0CEF06jjKnKpeu3mylLMi0PA5OKjubQzxKKb8ZCODBKHnyXfnExFVaywIMl5woO_HakkNQIucSI/pub?output=xlsx"
-#GENERANDO UN TEMPORAL
-tp1<-tempfile()
-#DESCARGAR
-download.file(FUENTE_UFC,tp1,mode ="wb")
-#SELECCIONAR LA PESTA?A DEL TEMPORAL
-BD_CRITICAS<-read_xlsx(path = tp1, sheet = "ORIGINAL")
-
-#ELIMINAR UNA VARIABLE
-BD_CRITICAS=BD_CRITICAS %>%
-  subset(select = -c(`N°`,`CODIGO DE UBIGEO`, DEPARTAMENTO)) %>%
-  as.data.frame() %>%
-  mutate(SUBSECTOR=case_when(SUBSECTOR=="Electricidad"~"CELE",
-                             SUBSECTOR=="Minería"~"CMIN",
-                             SUBSECTOR=="Hidrocarburos"~"CHID",
-                             SUBSECTOR=="Industria"~"CIND",
-                             SUBSECTOR=="Agricultura"~"CAGR",
-                             SUBSECTOR=="Pesca"~"CPES",
-                             SUBSECTOR=="Residuos Sólidos"~"CRES")) %>%
-  mutate(AUX=paste(COD_UF,SUBSECTOR,sep = "-"))
+# #FUENTE
+# FUENTE_UFC= "https://docs.google.com/spreadsheets/d/e/2PACX-1vQeH0CEF06jjKnKpeu3mylLMi0PA5OKjubQzxKKb8ZCODBKHnyXfnExFVaywIMl5woO_HakkNQIucSI/pub?output=xlsx"
+# #GENERANDO UN TEMPORAL
+# tp1<-tempfile()
+# #DESCARGAR
+# download.file(FUENTE_UFC,tp1,mode ="wb")
+# #SELECCIONAR LA PESTA?A DEL TEMPORAL
+# BD_CRITICAS<-read_xlsx(path = tp1, sheet = "ORIGINAL")
+# 
+# #ELIMINAR UNA VARIABLE
+# BD_CRITICAS=BD_CRITICAS %>%
+#   subset(select = -c(`N°`,`CODIGO DE UBIGEO`, DEPARTAMENTO)) %>%
+#   as.data.frame() %>%
+#   mutate(SUBSECTOR=case_when(SUBSECTOR=="Electricidad"~"CELE",
+#                              SUBSECTOR=="Minería"~"CMIN",
+#                              SUBSECTOR=="Hidrocarburos"~"CHID",
+#                              SUBSECTOR=="Industria"~"CIND",
+#                              SUBSECTOR=="Agricultura"~"CAGR",
+#                              SUBSECTOR=="Pesca"~"CPES",
+#                              SUBSECTOR=="Residuos Sólidos"~"CRES")) %>%
+#   mutate(AUX=paste(COD_UF,SUBSECTOR,sep = "-"))
 
 
 
@@ -177,20 +155,20 @@ BD_CRITICAS=BD_CRITICAS %>%
 # BD PLANEFA
 # ----------- -
 
-#FUENTE
-FUENTE_PLANEFA= "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIScdxGBlkl_r2lf8GcW-F_RtRfKCtbD7xHnG0xcUxLnVdIR2lqVCeGMjuoeaIcRPLnsICAG-uwPYn/pub?output=xlsx"
-#GENERANDO UN TEMPORAL
-tp1<-tempfile()
-#DESCARGAR
-download.file(FUENTE_PLANEFA,tp1,mode ="wb")
-#SELECCIONAR LA PESTAÑA DEL TEMPORAL
-BD_PLANEFA<-read_xlsx(path = tp1, sheet = "CRITICOS")
-
-#ELIMINAR UNA VARIABLE
-BD_PLANEFA=BD_PLANEFA %>%
-  subset(select = -c(COD_COORD,N_ADMIN,N_UF,UBIC_UF:DIST_SUP)) %>%
-  distinct(COD_UF, .keep_all = TRUE) %>%
-  mutate(CASO_PRIOR="PRIORIZADO")
+# #FUENTE
+# FUENTE_PLANEFA= "https://docs.google.com/spreadsheets/d/e/2PACX-1vRIScdxGBlkl_r2lf8GcW-F_RtRfKCtbD7xHnG0xcUxLnVdIR2lqVCeGMjuoeaIcRPLnsICAG-uwPYn/pub?output=xlsx"
+# #GENERANDO UN TEMPORAL
+# tp1<-tempfile()
+# #DESCARGAR
+# download.file(FUENTE_PLANEFA,tp1,mode ="wb")
+# #SELECCIONAR LA PESTAÑA DEL TEMPORAL
+# BD_PLANEFA<-read_xlsx(path = tp1, sheet = "CRITICOS")
+# 
+# #ELIMINAR UNA VARIABLE
+# BD_PLANEFA=BD_PLANEFA %>%
+#   subset(select = -c(COD_COORD,N_ADMIN,N_UF,UBIC_UF:DIST_SUP)) %>%
+#   distinct(COD_UF, .keep_all = TRUE) %>%
+#   mutate(CASO_PRIOR="PRIORIZADO")
 
 
 
@@ -198,30 +176,30 @@ BD_PLANEFA=BD_PLANEFA %>%
 # __________________________________________________________________________________________________________________________________________________________
 # __________________________________________________________________________________________________________________________________________________________
 
-# --------------------- -
-# BD HISTORIAL DE IGAS
-# --------------------- -
-
-#FUENTE
-FUENTE_HISTORIAL<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBErlOvYBET_39N9DVvanERIeuH1FlC-xDubfnvcvKWOOTpFEFSYR_HnQx9faFZCu_J6T-CgtwjZ6W/pub?output=xlsx"
-#GENERANDO UN TEMPORAL
-tp1<-tempfile()
-#DESCARGAR
-download.file(FUENTE_HISTORIAL,tp1,mode ="wb")
-#SELECCIONAR LA PESTAÑA DEL TEMPORAL
-BD_HISTORIAL<-read_xlsx(path = tp1, sheet = "BD_HISTORIAL")
-BD_HISTORIAL_DICC<-read_xlsx(path = tp1, sheet = "DIC_DATOS")
-
-#TRABAJAR ENCABEZADOS
-BD_HISTORIAL_DICC=BD_HISTORIAL_DICC %>% 
-  subset(INFO_IRRELEV!=1, select=c(1,2)) %>%  #Se eliminan las variables irrelevantes y solo me quedo con los campos en BD y el CODIGO CSEP
-  as.list() #Defino las cabeceras
-
-BD_HISTORIAL=BD_HISTORIAL %>% 
-  subset(select = BD_HISTORIAL_DICC$ENCABEZADOS)
-
-colnames(BD_HISTORIAL)=BD_HISTORIAL_DICC$COD_ENCAB #Renombro las cabeceras seg?n CODIGO CSEP
-rm(BD_HISTORIAL_DICC)
+# # --------------------- -
+# # BD HISTORIAL DE IGAS
+# # --------------------- -
+# 
+# #FUENTE
+# FUENTE_HISTORIAL<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSBErlOvYBET_39N9DVvanERIeuH1FlC-xDubfnvcvKWOOTpFEFSYR_HnQx9faFZCu_J6T-CgtwjZ6W/pub?output=xlsx"
+# #GENERANDO UN TEMPORAL
+# tp1<-tempfile()
+# #DESCARGAR
+# download.file(FUENTE_HISTORIAL,tp1,mode ="wb")
+# #SELECCIONAR LA PESTAÑA DEL TEMPORAL
+# BD_HISTORIAL<-read_xlsx(path = tp1, sheet = "BD_HISTORIAL")
+# BD_HISTORIAL_DICC<-read_xlsx(path = tp1, sheet = "DIC_DATOS")
+# 
+# #TRABAJAR ENCABEZADOS
+# BD_HISTORIAL_DICC=BD_HISTORIAL_DICC %>% 
+#   subset(INFO_IRRELEV!=1, select=c(1,2)) %>%  #Se eliminan las variables irrelevantes y solo me quedo con los campos en BD y el CODIGO CSEP
+#   as.list() #Defino las cabeceras
+# 
+# BD_HISTORIAL=BD_HISTORIAL %>% 
+#   subset(select = BD_HISTORIAL_DICC$ENCABEZADOS)
+# 
+# colnames(BD_HISTORIAL)=BD_HISTORIAL_DICC$COD_ENCAB #Renombro las cabeceras seg?n CODIGO CSEP
+# rm(BD_HISTORIAL_DICC)
 
 
 
@@ -233,33 +211,11 @@ rm(BD_HISTORIAL_DICC)
 # BD ARCHIVOS DE IGAS
 # -------------------- -
 
-#FUENTE
-FUENTE_ARCH<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vSnQ63y1JKc00rbS0N2LIYg5QyaXIhbs9km-M2uCYsWVkjftSL4BljLgLUH64gG1RlrtOBCu4Ik4CUf/pub?output=xlsx"
-#GENERANDO UN TEMPORAL
-tp1<-tempfile()
-#DESCARGAR
-download.file(FUENTE_ARCH,tp1,mode ="wb")
-#SELECCIONAR LA PESTA?A DEL TEMPORAL
-BD_ARCH<-read_xlsx(path = tp1, sheet = "BD_ARCH")
-BD_DIC_ARCH<-read_xlsx(path = tp1, sheet = "DIC_DATOS")
-
-#TRABAJAR ENCABEZADOS
-BD_DIC_ARCH=BD_DIC_ARCH %>% 
-  subset(INFO_IRRELEV!=1, select=c(1,2)) %>%  #Se eliminan las variables irrelevantes y solo me quedo con los campos en BD y el CODIGO CSEP
-  as.list() #Defino las cabeceras
-
-BD_ARCH=BD_ARCH %>% 
-  subset(select = BD_DIC_ARCH$ENCABEZADOS)
-
-colnames(BD_ARCH)=BD_DIC_ARCH$COD_ENCAB #Renombro las cabeceras seg?n CODIGO CSEP
-rm(BD_DIC_ARCH)
-
-#TRABAJAR LA DATA
-BD_ARCH=BD_ARCH %>%
-  mutate(ARCH_SIZE_MB=round(BD_ARCH$ARCH_SIZE/1000000,2)) %>%
-  group_by(COD_INST) %>%
-  summarise(ARCH_SIZE_MB=sum(ARCH_SIZE_MB, na.rm = T))
-
+BD_ARCH_AUX = BD_ARCH %>% 
+  group_by(COD_IGA) %>% 
+  summarise(ARCH_SIZE = sum(ARCH_SIZE),
+            ARCH_SIZE_MB = sum(ARCH_SIZE_MB),
+            ARCH_SIZE_GB = sum(ARCH_SIZE_GB))
 
 
 
@@ -271,14 +227,13 @@ BD_ARCH=BD_ARCH %>%
 # --------------------- -
 
 #COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
-BD_INAF=merge(BD_INAF,BD_ARCH,
-              by.x="Código",
-              by.y="COD_INST",
+BD_IGAS=merge(BD_IGAS, BD_ARCH_AUX,
+              by.x="COD_IGA",
+              by.y="COD_IGA",
               all.x=T) %>%
-  mutate(ESTADO_AUX="En proceso") %>%
-  mutate(ESTADO_AUX=ifelse(ESTADO=="VALIDADO","Validado",NA)) %>%
-  mutate(ARCH_SIZE_MB=ifelse(is.na(ARCH_SIZE_MB)==T,0,ARCH_SIZE_MB)) %>%
-  mutate(AUX=paste(COD_UF,SUB_SECT,sep = "-"))
+  mutate(ARCH_SIZE_MB = ifelse(is.na(ARCH_SIZE_MB) == T, 0, ARCH_SIZE_MB)) %>%
+  mutate(ARCH_SIZE_GB = ifelse(is.na(ARCH_SIZE_GB) == T, 0, ARCH_SIZE_GB)) #%>%
+  # mutate(AUX=paste(COD_UF,SUB_SECT,sep = "-"))
 
 
 
@@ -286,16 +241,16 @@ BD_INAF=merge(BD_INAF,BD_ARCH,
 # __________________________________________________________________________________________________________________________________________________________
 # __________________________________________________________________________________________________________________________________________________________
 
-# ------------------------- -
-# UNIENDO BD IGAS+CRITICAS
-# ------------------------- -
-
-#COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
-BD_INAF_CRIT=merge(BD_INAF,BD_CRITICAS,
-                   by.x="AUX",
-                   by.y="AUX",
-                   all.x=T) %>%
-  mutate(UF_CRITICA=ifelse(is.na(FUENTE)==T,"NO","SI")) 
+# # ------------------------- -
+# # UNIENDO BD IGAS+CRITICAS
+# # ------------------------- -
+# 
+# #COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
+# BD_INAF_CRIT=merge(BD_INAF,BD_CRITICAS,
+#                    by.x="AUX",
+#                    by.y="AUX",
+#                    all.x=T) %>%
+#   mutate(UF_CRITICA=ifelse(is.na(FUENTE)==T,"NO","SI")) 
 
 
 
@@ -306,14 +261,14 @@ BD_INAF_CRIT=merge(BD_INAF,BD_CRITICAS,
 # UNIENDO BD IGAS+PRIORIZADOS
 # ---------------------------- -
 
-#COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
-BD_INAF_PRIOR=merge(BD_INAF,BD_PLANEFA,
-                   by.x="COD_UF",
-                   by.y="COD_UF",
-                   all.x=T) %>%
-  mutate(CASO_PRIOR=case_when(is.na(CASO_PRIOR)==T~"NO",
-                              CASO_PRIOR=="PRIORIZADO"~"SI")) %>%
-  mutate(ESTADO_AUX=ifelse(ESTADO=="VALIDADO","Validado","En proceso"))
+# #COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
+# BD_IGA_PRIOR=merge(BD_INAF,BD_PLANEFA,
+#                    by.x="COD_UF",
+#                    by.y="COD_UF",
+#                    all.x=T) %>%
+#   mutate(CASO_PRIOR=case_when(is.na(CASO_PRIOR)==T~"NO",
+#                               CASO_PRIOR=="PRIORIZADO"~"SI")) %>%
+#   mutate(ESTADO_AUX=ifelse(ESTADO=="VALIDADO","Validado","En proceso"))
   
 
 
@@ -327,59 +282,59 @@ BD_INAF_PRIOR=merge(BD_INAF,BD_PLANEFA,
 # -------------------------- -
 
 #COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
-BD_INAF_AUX=subset(BD_INAF, select = c("Código","SUB_SECT_0","SUB_SECT","REGISTRADOR", "COD_UF","ESTADO")) %>%
-  distinct(Código,SUB_SECT , .keep_all = TRUE)
+BD_HISTORIAL = subset(BD_IGAS, select = c("COD_IGA","SUB_SECT_0","SUB_SECT","REGISTRADOR", "COD_UF")) %>%
+  distinct(COD_IGA,SUB_SECT , .keep_all = TRUE) %>% 
   
-BD_HISTORIAL=merge(BD_HISTORIAL,BD_INAF_AUX,
-                   by.x="COD_INST",
-                   by.y="Código",
-                   all.x=T)
+  merge(BD_HISTORIAL,
+        by.x="COD_IGA",
+        by.y="COD_IGA",
+        all.y=T)
 
 
 
 # __________________________________________________________________________________________________________________________________________________________
 # __________________________________________________________________________________________________________________________________________________________
 
-# -------------------- -
-# BD ADMINISTRADOS/UF
-# -------------------- -
-
-#FUENTE
-FUENTE_ARCH<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdvKvyxqdRnyvkFngDf9SGvBZVZt9aHygcq6JWgMUVeDxJE6QqsgTCwsSdhq0xFQvMSLYOT1-XifxV/pub?output=xlsx"
-#GENERANDO UN TEMPORAL
-tp1<-tempfile()
-#DESCARGAR
-download.file(FUENTE_ARCH,tp1,mode ="wb")
-#SELECCIONAR LA PESTA?A DEL TEMPORAL
-BD_ADM_UF<-read_xlsx(path = tp1, sheet = "BD_ADM_UF") %>%
-  mutate(SUB_SECT=case_when(SUB_SECT=="Electricidad"~"CELE",
-                            SUB_SECT=="Minería"~"CMIN",
-                            SUB_SECT=="Hidrocarburos"~"CHID",
-                            SUB_SECT=="Industria"~"CIND",
-                            SUB_SECT=="Agricultura"~"CAGR",
-                            SUB_SECT=="Pesquería"~"CPES",
-                            SUB_SECT=="Residuos Sólidos"~"CRES",
-                            SUB_SECT=="Consultoras Ambientales"~"CAMB")) %>% 
+# # -------------------- -
+# # BD ADMINISTRADOS/UF
+# # -------------------- -
+# 
+# #FUENTE
+# FUENTE_ARCH<- "https://docs.google.com/spreadsheets/d/e/2PACX-1vRdvKvyxqdRnyvkFngDf9SGvBZVZt9aHygcq6JWgMUVeDxJE6QqsgTCwsSdhq0xFQvMSLYOT1-XifxV/pub?output=xlsx"
+# #GENERANDO UN TEMPORAL
+# tp1<-tempfile()
+# #DESCARGAR
+# download.file(FUENTE_ARCH,tp1,mode ="wb")
+# #SELECCIONAR LA PESTA?A DEL TEMPORAL
+# BD_ADM_UF<-read_xlsx(path = tp1, sheet = "BD_ADM_UF") %>%
+#   mutate(SUB_SECT=case_when(SUB_SECT=="Electricidad"~"CELE",
+#                             SUB_SECT=="Minería"~"CMIN",
+#                             SUB_SECT=="Hidrocarburos"~"CHID",
+#                             SUB_SECT=="Industria"~"CIND",
+#                             SUB_SECT=="Agricultura"~"CAGR",
+#                             SUB_SECT=="Pesquería"~"CPES",
+#                             SUB_SECT=="Residuos Sólidos"~"CRES",
+#                             SUB_SECT=="Consultoras Ambientales"~"CAMB")) %>% 
+#   
+#   mutate(UF_CON_IGA=case_when(UF_NECESITA_IGA == "SI" ~ "SI",
+#                               str_detect(UF_NECESITA_IGA, "NO")~ "NO",
+#                               # UF_NECESITA_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
+#                               is.na(UF_NECESITA_IGA) == T ~ "PENDIENTE"))
   
-  mutate(UF_CON_IGA=case_when(UF_NECESITA_IGA == "SI" ~ "SI",
-                              str_detect(UF_NECESITA_IGA, "NO")~ "NO",
-                              # UF_NECESITA_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-                              is.na(UF_NECESITA_IGA) == T ~ "PENDIENTE"))
-  
 
 
 
 # __________________________________________________________________________________________________________________________________________________________
 # __________________________________________________________________________________________________________________________________________________________
 
-# ---------------------------- -
-# BD ADMINISTRADOS/UF+PLANEFA
-# ---------------------------- -
-
-BD_ADM_UF=merge(BD_ADM_UF,BD_PLANEFA,
-                   by.x="COD_UF",
-                   by.y="COD_UF",
-                   all.x=T)
+# # ---------------------------- -
+# # BD ADMINISTRADOS/UF+PLANEFA
+# # ---------------------------- -
+# 
+# BD_ADM_UF=merge(BD_ADM_UF,BD_PLANEFA,
+#                    by.x="COD_UF",
+#                    by.y="COD_UF",
+#                    all.x=T)
 
 
 
@@ -415,7 +370,7 @@ BD_ADM_UF=merge(BD_ADM_UF,BD_PLANEFA,
 
 
 
-########################################
+#############################################
 
 
 # __________________________________________________________________________________________________________________________________________________________
@@ -450,7 +405,7 @@ BD_ADM_UF=merge(BD_ADM_UF,BD_PLANEFA,
 # SETEANDO FECHAS Y PARAMETROS DE GRÁFICOS
 # ----------------------------------------- -
 
-input=data.frame(RANGO=c(as.Date(min(BD_INAF$F_REG),"%Y-%m-%d"),Sys.Date())) #Artificio para que pueda interactuar con Shiny
+input=data.frame(RANGO=c(as.Date(min(BD_IGAS$F_REG_IGA),"%Y-%m-%d"),Sys.Date())) #Artificio para que pueda interactuar con Shiny
 F_INICIO_REV_CSIG="2020-06-08"
 
 RES=250
@@ -470,65 +425,63 @@ ESCAL_CONV=0.026458333
 ##    1.1) AVANCE VS OBSERVACIONES A NIVEL DE REGISTRO    ####
 ## ###################################################### ###
 
-# GENERANDO DATA 1
+# GENERANDO TABLA CON CALCULO DE IGAS CON OBSERVACIONES
 SUB_BD_HISTORIAL=BD_HISTORIAL %>%
-  mutate(OBS_ERRORES=ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor")==T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit")==T | is.na(OBS_DOC)==T,"F","T")) %>%  #Creando una variable para supuestamente distinguir casos observados por detalles (ortografía, etc.)
-  subset(F_ESTADO>=input$RANGO[1] & F_ESTADO<=input$RANGO[2]) %>%
-  mutate(C_FLUJOS=1,OBS=ifelse(PROC_ESTADO=="OBSERVADO",1,0)) %>%
-  mutate(MES=month(F_ESTADO)) %>%
-  group_by(SUB_SECT,ESTADO,COD_INST,ETAPA,OBS_ERRORES) %>%
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE),OBS = sum(OBS,na.rm = TRUE)) %>%
+  # subset(SUB_SECT %in% input$LISTA) %>%
+  mutate(OBS_ERRORES = ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor") == T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit") == T | is.na(OBS_DOC) == T,"AUTOCORRECCION/SIN OBS","OBSERVACION")) %>%  #Distinguir los casos realmente catalogados como observaciones
+  subset(F_ESTADO >= input$RANGO[1] & F_ESTADO <= input$RANGO[2]) %>%
+  mutate(C_FLUJOS = 1, OBS = ifelse(ESTADO== "OBSERVADO", 1, 0)) %>%
+  group_by(SUB_SECT,ESTADO,COD_IGA,ETAPA,OBS_ERRORES) %>%
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), OBS = sum(OBS,na.rm = TRUE)) %>%
   
-  mutate(OBS=ifelse(OBS>=1,1,0)) %>%
-  mutate(CASOS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)",1,0)) %>%
-  mutate(OBS_COORD=ifelse(ETAPA=="2) REVISOR" & OBS==1,1,0)) %>%  #Contabilizamos los casos observados por los coordinadores
+  mutate(OBS=ifelse(OBS>=1,1,0),
+         CASOS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)",1,0),
+         OBS_COORD = ifelse(ETAPA == "2) REVISOR" & OBS == 1 , 1, 0),
+         OBS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)" & OBS == 1 & OBS_ERRORES == "OBSERVACION",1,0)) %>% #Cantidad de OBSERVACIONES REALIZADAS POR CSIG
   
-  mutate(OBS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)"&OBS==1&OBS_ERRORES=="T",1,0)) %>%
-  group_by(COD_INST,SUB_SECT,ESTADO) %>%
-  summarise(C_FLUJOS=sum(C_FLUJOS,na.rm = TRUE), 
+  group_by(COD_IGA,SUB_SECT, ESTADO) %>%
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
             OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE),
+            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), 
             OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
             OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE)) %>%
-  mutate(OBS=ifelse(OBS>=1,1,0),
-         CASOS_COORD=1) %>%
+  
+  mutate(OBS=ifelse(OBS >= 1,1,0),
+         CASOS_COORD = 1) %>%
   group_by(SUB_SECT) %>%
   
-  summarise(C_FLUJOS=sum(C_FLUJOS,na.rm = TRUE), 
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
             OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE),
+            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE), 
             OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
             OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE), 
             CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>%
-  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1),
+  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1), 
          PORC_CASOS_OBS_CSIG=round(100*(1-OBS_CSIG/CASOS_CSIG),1)) %>%
   subset(is.na(SUB_SECT)==F)
 
 
-BD_UNIV_ADM_UF=BD_ADM_UF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = "COD_UF",
-  #       by.y = "COD_UF",
-  #       all.x = T) %>% 
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>% 
-  subset(UF_CON_IGA!="NO") %>%
+
+
+
+# GENERANDO TABLA CON CALCULO DE UNIVERSO DE UF (SEGUN REGISTRO)
+TABLA_UNIV_ADM_UF=BD_ADM_UF %>%
+  # subset(UF_CON_IGA!="NO") %>% #ACTIVAR CUANDO SE TENGA EL CAMPO
   group_by(SUB_SECT) %>%
   summarise(UNIV_UF=n_distinct(COD_UF))
 
 
-BD_RESUMEN_1=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>% #
+
+TABLA_RESUMEN_1= subset(BD_IGAS,F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>% #
   group_by(COD_UF,SUB_SECT) %>%
   summarise(C_IGAS = n()) %>%
   merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),
-        by.x="COD_UF",
-        by.y="COD_UF",
-        all.x=T)%>%
-  rename(SUB_SECT=SUB_SECT.x) %>%
+        by.x=c("COD_UF","SUB_SECT"),
+        by.y=c("COD_UF","SUB_SECT"),
+        all.x=T)%>%  # CONTRADICCION (HAY UF QUE SUPUESTAMENTE NO DEBIERAN TENER IGAS, SIN EMBARGO, SIN LOS TIENEN [Cuando se activa la variable de si debiera contar con IGA])
   group_by(SUB_SECT) %>%
   summarise(TOT_IGA_INAF=sum(C_IGAS),MEDIA_IGA_UF=mean(C_IGAS),MEDIANA_IGA_UF=median(C_IGAS),DS_IGA_UF=sd(C_IGAS),media_T=mean(C_IGAS), Q3_IGA_UF=quantile(C_IGAS, 0.74),UNIV_UF_INAF=n_distinct(COD_UF)) %>%
-  merge(BD_UNIV_ADM_UF,
+  merge(TABLA_UNIV_ADM_UF,
         by.x="SUB_SECT",
         by.y="SUB_SECT",
         all.x=T) %>%
@@ -545,11 +498,13 @@ BD_RESUMEN_1=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>% 
 
 
 
+
+
 #GRAFICANDO
-BUBBLE_GRAPH=ggplot(BD_RESUMEN_1)+
-  annotate("rect", xmin = 0, xmax = 60, ymin = 50, ymax = 102, #1
+BUBBLE_GRAPH1=ggplot(TABLA_RESUMEN_1)+
+  annotate("rect", xmin = 0, xmax = 60, ymin = 50, ymax = 102, 
            alpha = 0.1, fill = "firebrick") + 
-  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, #2
+  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, 
            alpha = 0.1, fill = "firebrick") + 
   geom_point(aes(x=AVANCE_IGA,y=PORC_CASOS_OBS_CSIG,size=TOT_IGA_INAF,color=SUB_SECT), alpha=0.8)+
   scale_color_manual(values=c(PALETA.PRINCIPAL))+
@@ -557,38 +512,38 @@ BUBBLE_GRAPH=ggplot(BD_RESUMEN_1)+
   theme_minimal()+
   theme(panel.grid.minor = element_blank(),
         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")),
-        plot.title = element_text(size = 18, face = "bold"))+ #5
+        plot.title = element_text(size = 18, face = "bold"))+
   
-  scale_x_continuous(limits = c(0, 102), breaks = seq(0,100,10), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+ #3
-
+  scale_x_continuous(limits = c(0, 102), breaks = seq(0,100,10), expand = c(0, 0)) +
+  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+
+  
   labs(x="IGAs en INAF* (%)",
        y="\nIGA sin observaciones (%)",
-       title = paste("IGA sin observaciones de CSIG y avance de Registrador"),
-       subtitle = paste("(Revisión de CSIG del ",
-                        format.Date(input$RANGO[1], "%d/%m/%Y"),
-                        " al ",
-                        format.Date(input$RANGO[2], "%d/%m/%Y"),
+       title = paste("IGA sin observaciones de CSIG y avance de registro*."),
+       subtitle = paste("(Revisión de CSIG del ",format.Date(input$RANGO[1], "%d/%m/%Y"),
+                        " al ", format.Date(input$RANGO[2], "%d/%m/%Y"),
                         ")\n",
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia\n*Estimado\nNota1: Los casos óptimos son aquellos con una tasa de observaciones de más del 90% y un llenado de más de 60% de los caos, delimitado por el área de color rosado\nNota2: Para CRES, debido a que la mayoría de UF no cuenta con IGA, los que han registrado ya constituye el universo. Es por ello que se ha considerado un avance del 100%")+
-  scale_size(range = c(0.5,25), name="Cantidad de IGA\nregistrados en INAF")+ #7
+       caption = "Fuente: INAF\n*Estimado")+
+  scale_size(range = c(0.5,25), name="Cantidad de IGA\nregistrados en INAF")+
   geom_point(aes(x=AVANCE_IGA,y=PORC_CASOS_OBS_CSIG,size=1))+
   geom_hline(yintercept=90, linetype="dashed", color = "red", size=1)+
   geom_vline(xintercept=60, linetype="dashed", color = "red", size=1)+
   
-  geom_text( x = 60, y = 50, angle = 90, label = paste("Umbral en llenado (60%)", sep=""), #4
-           hjust = 0,vjust = -0.5,size =5)+
+  geom_text( x = 60, y = 50, angle = 90, label = paste("Umbral en llenado (60%)", sep=""), 
+             hjust = 0,vjust = -0.5,size =5)+
   geom_text( x = 0, y = 90, angle = 0, label = paste("Umbral en observaciones (90%)", sep=""), 
              hjust = 0,vjust = -0.5,size =5)+
   guides(color = guide_legend(override.aes = list(size = 5)))+
   
   ggeasy::easy_add_legend_title("Área")+
-  ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 12)+  #8
-  ggeasy::easy_text_size(c("legend.text","axis.title"),size = 12)  #6
+  ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 12)+
+  ggeasy::easy_text_size(c("legend.text","axis.title"),size = 10)
 
-  
-BUBBLE_GRAPH
+
+BUBBLE_GRAPH1
+
+
 
 ggsave("0.3.1) OBSERVACIONES-ACTUAL.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
 
@@ -604,87 +559,97 @@ ggsave("0.3.1) OBSERVACIONES-ACTUAL.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height 
 ##    1.2) AVANCE VS OBSERVACIONES A NIVEL DE COORDINADOR    ####
 ## ######################################################### ###
 
-# GENERANDO DATA 1
+# GENERANDO TABLA CON CALCULO DE IGAS CON OBSERVACIONES
 SUB_BD_HISTORIAL=BD_HISTORIAL %>%
-  mutate(OBS_ERRORES=ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador")==T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit")==T | is.na(OBS_DOC)==T,"F","T")) %>%  #Creando una variable para supuestamente distinguir casos observados por detalles (ortografía, etc.)
-  subset(F_ESTADO>=input$RANGO[1] & F_ESTADO<=input$RANGO[2]) %>%  #CORREGIR
-  mutate(C_FLUJOS=1,OBS=ifelse(PROC_ESTADO=="OBSERVADO",1,0)) %>%
-  mutate(MES=month(F_ESTADO)) %>%
-  group_by(SUB_SECT,ESTADO,COD_INST,ETAPA,OBS_ERRORES) %>%
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE),OBS = sum(OBS,na.rm = TRUE)) %>%
-  mutate(OBS=ifelse(OBS>=1,1,0)) %>%
-  mutate(CASOS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)",1,0)) %>%
-  mutate(OBS_COORD=ifelse(ETAPA=="2) REVISOR"&OBS==1,1,0)) %>%  #Contabilizamos los casos observados por los coordinadores
-  mutate(OBS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)"&OBS==1&OBS_ERRORES!="T",1,0)) %>%
-  group_by(COD_INST,SUB_SECT,ESTADO) %>%
-  summarise(C_FLUJOS=sum(C_FLUJOS,na.rm = TRUE), OBS=sum(OBS,na.rm = TRUE),CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), OBS_COORD=sum(OBS_COORD,na.rm = TRUE), OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE)) %>%
-  mutate(OBS=ifelse(OBS>=1,1,0),CASOS_COORD=1) %>%
+  # subset(SUB_SECT %in% input$LISTA) %>%
+  mutate(OBS_ERRORES = ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor") == T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit")==T | is.na(OBS_DOC)==T,"AUTOCORRECCION/SIN OBS","OBSERVACION")) %>%  #Distinguir los casos realmente catalogados como observaciones
+  subset(F_ESTADO >= input$RANGO[1] & F_ESTADO <= input$RANGO[2]) %>%
+  mutate(C_FLUJOS = 1, OBS = ifelse(ESTADO== "OBSERVADO", 1, 0)) %>%
+  group_by(SUB_SECT,ESTADO,COD_IGA,ETAPA,OBS_ERRORES) %>%
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), OBS = sum(OBS,na.rm = TRUE)) %>%
+  
+  mutate(OBS=ifelse(OBS>=1,1,0),
+         CASOS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)",1,0),
+         OBS_COORD = ifelse(ETAPA == "2) REVISOR" & OBS == 1 , 1, 0),
+         OBS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)" & OBS == 1 & OBS_ERRORES == "OBSERVACION",1,0)) %>% #Cantidad de OBSERVACIONES REALIZADAS POR CSIG
+  
+  group_by(COD_IGA,SUB_SECT, ESTADO) %>%
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
+            OBS=sum(OBS,na.rm = TRUE),
+            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), 
+            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
+            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE)) %>%
+  
+  mutate(OBS=ifelse(OBS >= 1,1,0),
+         CASOS_COORD = 1) %>%
   group_by(SUB_SECT) %>%
-  summarise(C_FLUJOS=sum(C_FLUJOS,na.rm = TRUE), OBS=sum(OBS,na.rm = TRUE),CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), OBS_COORD=sum(OBS_COORD,na.rm = TRUE), OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE), CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>%
-  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1), PORC_CASOS_OBS_CSIG=round(100*(1-OBS_CSIG/CASOS_CSIG),1)) %>%
+  
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
+            OBS=sum(OBS,na.rm = TRUE),
+            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE), 
+            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
+            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE), 
+            CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>%
+  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1), 
+         PORC_CASOS_OBS_CSIG=round(100*(1-OBS_CSIG/CASOS_CSIG),1)) %>%
   subset(is.na(SUB_SECT)==F)
 
 
 
-BD_UNIV_ADM_UF=BD_ADM_UF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>% 
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>% 
-  subset(UF_CON_IGA!="NO") %>%
+TABLA_UNIV_ADM_UF=BD_ADM_UF %>%
+  # subset(UF_CON_IGA!="NO") %>% #ACTIVAR CUANDO SE TENGA EL CAMPO
   group_by(SUB_SECT) %>%
   summarise(UNIV_UF=n_distinct(COD_UF))
 
 
-
-BD_RESUMEN_2=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>%
+TABLA_RESUMEN_2=subset(BD_IGAS, F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>%
   group_by(COD_UF,SUB_SECT) %>%
   summarise(C_IGAS = n()) %>%
   merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),
-        by.x="COD_UF",
-        by.y="COD_UF",
+        by.x=c("COD_UF","SUB_SECT"),
+        by.y=c("COD_UF","SUB_SECT"),
         all.x=T)%>%
-  rename( SUB_SECT=SUB_SECT.x) %>%
+  # rename( SUB_SECT=SUB_SECT.x) %>%
   group_by(SUB_SECT) %>%
   summarise(TOT_IGA_INAF=sum(C_IGAS),MEDIA_IGA_UF=mean(C_IGAS),MEDIANA_IGA_UF=median(C_IGAS),DS_IGA_UF=sd(C_IGAS),media_T=mean(C_IGAS), Q3_IGA_UF=quantile(C_IGAS, 0.74),UNIV_UF_INAF=n_distinct(COD_UF)) %>%
-  merge(BD_UNIV_ADM_UF,
+  merge(TABLA_UNIV_ADM_UF,
         by.x="SUB_SECT",
         by.y="SUB_SECT",
         all.x=T) %>%
-  subset(is.na(SUB_SECT)==F) %>%
-  mutate(MEDIA_AJUST=MEDIA_IGA_UF+DS_IGA_UF*(1-(UNIV_UF_INAF/UNIV_UF)), E_UNIV_IGAS=ceiling(MEDIA_AJUST*UNIV_UF), AVANCE_IGA=TOT_IGA_INAF/E_UNIV_IGAS) %>%
+  subset(is.na(SUB_SECT) == F) %>%
+  mutate(MEDIA_AJUST = MEDIA_IGA_UF+DS_IGA_UF*(1-(UNIV_UF_INAF/UNIV_UF)), E_UNIV_IGAS=ceiling(MEDIA_AJUST*UNIV_UF), AVANCE_IGA = TOT_IGA_INAF/E_UNIV_IGAS) %>%
   merge(SUB_BD_HISTORIAL,
         by.x="SUB_SECT",
         by.y="SUB_SECT",
-        all.x=T) %>%
+        all.x = T) %>%
   mutate(AVANCE_IGA=100*round(AVANCE_IGA,3)) %>%
-  subset(is.na(TOT_IGA_INAF)==F) %>%
-  mutate(AVANCE_IGA=ifelse(SUB_SECT=="CRES",100,AVANCE_IGA)) %>%
+  subset(is.na(TOT_IGA_INAF) == F) %>%
+  mutate(AVANCE_IGA = ifelse(SUB_SECT == "CRES",100, AVANCE_IGA)) %>%
   as.data.frame()
 
 
-BD_RESUMEN_2=subset(BD_INAF,ETAPA=="3) CSIG (CALIDAD)") %>%
-  group_by(COD_UF,SUB_SECT) %>%
+
+TABLA_RESUMEN_3 = subset(BD_IGAS, ETAPA == "3) CSIG (CALIDAD)") %>%
+  group_by(COD_UF, SUB_SECT) %>%
   summarise(C_IGAS = n()) %>%
   group_by(SUB_SECT) %>%
-  summarise(IGAS_CSIG=sum(C_IGAS)) %>%
-  merge(BD_RESUMEN_2,
-        by.x="SUB_SECT",
-        by.y="SUB_SECT",
-        all.x=T) %>%
-  mutate(AVANCE_IGA_CSIG=100*round(IGAS_CSIG/E_UNIV_IGAS,3)) %>%
-  mutate(AVANCE_IGA_CSIG=ifelse(SUB_SECT=="CRES",100,AVANCE_IGA_CSIG))
+  summarise(IGAS_CSIG = sum(C_IGAS)) %>%
+  merge(TABLA_RESUMEN_2,
+        by.x = "SUB_SECT",
+        by.y = "SUB_SECT",
+        all.x = T) %>%
+  mutate(AVANCE_IGA_CSIG = 100*round(IGAS_CSIG/E_UNIV_IGAS, 3)) %>%
+  mutate(AVANCE_IGA_CSIG = ifelse(SUB_SECT == "CRES",100, AVANCE_IGA_CSIG))
+
+
 
 
 
 #GRAFICANDO
-BUBBLE_GRAPH=ggplot(BD_RESUMEN_2)+
-  annotate("rect", xmin = 0, xmax = 50, ymin = 50, ymax = 102, #1
+BUBBLE_GRAPH2=ggplot(TABLA_RESUMEN_3)+
+  annotate("rect", xmin = 0, xmax = 50, ymin = 50, ymax = 102, 
            alpha = 0.1, fill = "firebrick") + 
-  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, #2
+  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, 
            alpha = 0.1, fill = "firebrick") + 
   
   geom_point(aes(x=AVANCE_IGA_CSIG,y=PORC_CASOS_OBS_CSIG,size=TOT_IGA_INAF,color=SUB_SECT), alpha=0.8)+
@@ -694,39 +659,36 @@ BUBBLE_GRAPH=ggplot(BD_RESUMEN_2)+
   theme_minimal()+
   theme(panel.grid.minor = element_blank(),
         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")),
-        plot.title = element_text(size=18, face = "bold"))+ #5
+        plot.title = element_text(size=18,face = "bold"))+
   
   scale_x_continuous(limits = c(0, 102), breaks = seq(0,100,10), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+ #3
+  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+
   
   labs(x="IGAs aprobado por los coordinadores en INAF* (%)",
        y="\nIGA sin observaciones (%)",
-       title = paste("IGA sin observaciones de CSIG y avance de Coordinador"),
-       subtitle = paste("(Revisión de CSIG del ",
-                        format.Date(input$RANGO[1], "%d/%m/%Y"),
-                        " al ",
-                        format.Date(input$RANGO[2], "%d/%m/%Y"),
+       title = paste("IGA sin observaciones de CSIG y aprobados por coordinador*"),
+       subtitle = paste("(Revisión de CSIG del ",format.Date(input$RANGO[1], "%d/%m/%Y"),
+                        " al ",format.Date(input$RANGO[2], "%d/%m/%Y"),
                         ")\n",
                         sep = ""),
-       caption = "Fuente: INAF\nElaboración: Propia\n*Estimado\nNota1: Los casos óptimos son aquellos con una tasa sin observaciones de más del 90% y un llenado de más de 50% de los casos, delimitado por el Área de color rosado\nNota2: Para CRES, debido a que la mayoría de UF no cuenta con IGA, los que han registrado ya constituye el universo. Es por ello que se ha considerado un avance del 100%")+
-  scale_size(range = c(0.5,25), name="Cantidad de IGA\nregistrados en INAF")+ #7
-  geom_point(aes(x=AVANCE_IGA_CSIG,y=PORC_CASOS_OBS_CSIG,size=1))+
+       caption = "Fuente: INAF\n*Estimado")+
+  scale_size(range = c(0.5,25), name="Cantidad de IGA\nregistrados en INAF")+
+  geom_point(aes(x=AVANCE_IGA_CSIG,y=PORC_CASOS_OBS_CSIG,size=1))+        
   geom_hline(yintercept=90, linetype="dashed", color = "red", size=1)+
   geom_vline(xintercept=50, linetype="dashed", color = "red", size=1)+
   
-  geom_text( x = 50, y = 50, angle = 90, label = paste("Umbral en llenado (50%)", sep=""), #4
+  geom_text( x = 50, y = 50, angle = 90, label = paste("Umbral en llenado (50%)", sep=""), 
              hjust = 0,vjust = -0.5,size =5)+
   geom_text( x = 0, y = 90, angle = 0, label = paste("Umbral sin observaciones (90%)", sep=""), 
              hjust = 0,vjust = -0.5,size =5)+
   guides(color = guide_legend(override.aes = list(size = 5)))+
   
   ggeasy::easy_add_legend_title("Área")+
-  # ggeasy::easy_text_size(c("plot.title"),size = 22)+
-  ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 12)+#8
-  ggeasy::easy_text_size(c("legend.text","axis.title"),size = 10) #6
+  ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 12)+
+  ggeasy::easy_text_size(c("legend.text","axis.title"),size = 10)
 
 
-BUBBLE_GRAPH
+BUBBLE_GRAPH2
 
 
 ggsave("0.3.2) OBSERVACIONES-ANTERIOR.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
@@ -749,15 +711,15 @@ ggsave("0.3.2) OBSERVACIONES-ANTERIOR.jpg",  width = 0.6*ANCHO*ESCAL_CONV, heigh
 SUB_BD_HISTORIAL=BD_HISTORIAL %>%
   subset(F_ESTADO>=input$RANGO[1] & F_ESTADO<=input$RANGO[2]) %>%  #Acotando plazo de revisión
   mutate(OBS_ERRORES=ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador")==T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit")==T | is.na(OBS_DOC)==T,"F","T")) %>%  #Creando una variable para supuestamente distinguir casos observados por detalles (ortografía, etc.)
-  mutate(C_FLUJOS=1,OBS=ifelse(PROC_ESTADO=="OBSERVADO",1,0)) %>%  # Creando el campo "flujos" y el campo OBS que indica si un caso estuvo o no observado
+  mutate(C_FLUJOS=1,OBS=ifelse(ESTADO=="OBSERVADO",1,0)) %>%  # Creando el campo "flujos" y el campo OBS que indica si un caso estuvo o no observado
   mutate(MES=month(F_ESTADO)) %>%  #Creando la variable mes
-  group_by(SUB_SECT,COD_INST,ESTADO,ETAPA,OBS_ERRORES) %>%  # Agrupando, la idea es que por cada SUBSECTOR, por cada IGA a nivel de ESTADO (estado final), ETAPA y ¿Tipo de observación?, se tenga la cantidad de flujos y observaciones
+  group_by(SUB_SECT,COD_IGA,ESTADO,ETAPA,OBS_ERRORES) %>%  # Agrupando, la idea es que por cada SUBSECTOR, por cada IGA a nivel de ESTADO (estado final), ETAPA y ¿Tipo de observación?, se tenga la cantidad de flujos y observaciones
   summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE),OBS = sum(OBS,na.rm = TRUE)) %>%
   mutate(OBS=ifelse(OBS>=1,1,0)) %>%  #Cambiamos esta variable para que cuente la cantidad de casos observados
   mutate(CASOS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)",1,0)) %>%  #Contabilizamos los casos totales llegados a CSIG
   mutate(OBS_COORD=ifelse(ETAPA=="2) REVISOR"&OBS==1,1,0)) %>%  #Contabilizamos los casos observados por los coordinadores
   mutate(OBS_CSIG=ifelse(ETAPA=="3) CSIG (CALIDAD)"&OBS==1&OBS_ERRORES!="T",1,0)) %>%  #Contabilizamos los casos observados por CSIG
-  group_by(COD_INST,SUB_SECT,ESTADO) %>%  #Agrupamos los casos por IGA, SUBSECTOR y ESTADO (final del caso)
+  group_by(COD_IGA,SUB_SECT,ESTADO) %>%  #Agrupamos los casos por IGA, SUBSECTOR y ESTADO (final del caso)
   summarise(C_FLUJOS=sum(C_FLUJOS,na.rm = TRUE), OBS=sum(OBS,na.rm = TRUE),OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE),CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE),  OBS_COORD=sum(OBS_COORD,na.rm = TRUE)) %>%  #Se calcula la cantidad de flujos, las observaciones totales (de todo tipo), los casos y obs en CSIG y COORD
   mutate(OBS=ifelse(OBS>=1,1,0),CASOS_COORD=1) %>%  #Se arregla lla variable para contabilizar los IGA que tuvieron observaciones (al menos una)
   group_by(SUB_SECT) %>%  #Se agrupa a nivel de subsector
@@ -766,7 +728,7 @@ SUB_BD_HISTORIAL=BD_HISTORIAL %>%
   subset(is.na(SUB_SECT)==F)  #Eliminamos los casos donde no existan subsectores
 
 
-BD_UNIV_ADM_UF=BD_ADM_UF %>%
+BD_UNIV_ADM_UF = BD_ADM_UF %>%
   # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
   #       by.x = c("SUB_SECT","COD_UF"),
   #       by.y = c("SUBSECTOR","COD_UF"),
@@ -774,18 +736,18 @@ BD_UNIV_ADM_UF=BD_ADM_UF %>%
   # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
   #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
   #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>% 
-  subset(UF_CON_IGA!="NO") %>%
+  # subset(UF_CON_IGA!="NO") %>%
   group_by(SUB_SECT) %>%
   summarise(UNIV_UF=n_distinct(COD_UF))
 
 
-BD_RESUMEN_2=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>%  #Acotamos fechas
+BD_RESUMEN_2=subset(BD_IGAS, F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>%  #Acotamos fechas
   group_by(COD_UF,SUB_SECT) %>%  #Agrupamos por UF y SUBSECTOR
   summarise(C_IGAS = n()) %>%  #Calculamos la cantidad de IGAS
   merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),
         by.x="COD_UF",
         by.y="COD_UF",
-        all.x=T)%>%  #Combinamos la BD para traer la variable de cantidad de UF en INAF y demás características de la UF
+        all.x=T) %>%  #Combinamos la BD para traer la variable de cantidad de UF en INAF y demás características de la UF
   rename(SUB_SECT=SUB_SECT.x) %>%  #Renombramos variables
   group_by(SUB_SECT) %>%  #Agrupamos por SUBSECTOR (tendremos las métricas a niveld e UF)
   summarise(TOT_IGA_INAF=sum(C_IGAS),MEDIA_IGA_UF=mean(C_IGAS),MEDIANA_IGA_UF=median(C_IGAS),DS_IGA_UF=sd(C_IGAS), Q3_IGA_UF=quantile(C_IGAS, 0.75),UNIV_UF_INAF=n_distinct(COD_UF)) %>%  #Calculamos Cantidad total de IGAS EN INAF, promedio de IGA por UF, mediana, desviación estandar, tercer quartil, y cantidad total de UF
@@ -805,7 +767,7 @@ BD_RESUMEN_2=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>% 
   as.data.frame()
 
 
-BD_RESUMEN_2=subset(BD_INAF,ETAPA=="3) CSIG (CALIDAD)") %>%
+BD_RESUMEN_3 = subset(BD_IGAS,ETAPA=="3) CSIG (CALIDAD)") %>%
   group_by(COD_UF,SUB_SECT) %>%
   summarise(C_IGAS = n()) %>%
   group_by(SUB_SECT) %>%
@@ -818,7 +780,7 @@ BD_RESUMEN_2=subset(BD_INAF,ETAPA=="3) CSIG (CALIDAD)") %>%
   mutate(AVANCE_IGA_CSIG=ifelse(SUB_SECT=="CRES",100,AVANCE_IGA_CSIG))  #En toda esta sección, lo único que se realiza es traer los casos acotados al avance de CSIG 
 
 
-TAB_RES_CLAUDIA=BD_RESUMEN_2 %>%
+TAB_RES_CLAUDIA=BD_RESUMEN_3 %>%
   subset(select=c("SUB_SECT","TOT_IGA_INAF","UNIV_UF","UNIV_UF_INAF","RATIO_INCERTIDUMBRE","MEDIA_IGA_UF","MEDIA_AJUST","E_UNIV_IGAS","AVANCE_IGA","AVANCE_IGA_CSIG","PORC_CASOS_OBS_CSIG","DS_IGA_UF")) %>%
   mutate("UF sin registro de IGA"=UNIV_UF-UNIV_UF_INAF) %>% 
   rename("Subsector"=SUB_SECT,
@@ -834,7 +796,7 @@ TAB_RES_CLAUDIA=BD_RESUMEN_2 %>%
          "Porcentaje de casos sin observaciones (%)"=PORC_CASOS_OBS_CSIG,
          "Desviación estandar"=DS_IGA_UF) #Renombramos variables
 
-TAB_RES_CLAUDIA=TAB_RES_CLAUDIA[,c(1,3,4,13,5,2,6,12,7:11)]
+TAB_RES_CLAUDIA=TAB_RES_CLAUDIA[,c(1,3,4,13,5,2,6,12,7:13)]
 
 #GUARDANDO TABLA
 write.csv(TAB_RES_CLAUDIA,file="Tabla resumen.csv", na="")
@@ -912,22 +874,22 @@ write.csv(TAB_RES_CLAUDIA,file="Tabla resumen.csv", na="")
 library(cowplot)
 
 # GENERANDO DATA 1
-SUB_BD_HISTORIAL_1= BD_HISTORIAL %>%
+SUB_BD_HISTORIAL_1 = BD_HISTORIAL %>%
   subset(F_ESTADO>=input$RANGO[1] & F_ESTADO<=input$RANGO[2]) %>%
   subset(ETAPA=="3) CSIG (CALIDAD)") %>%
-  mutate(ESTADO_AUX=ifelse(PROC_ESTADO=="VALIDADO"|PROC_ESTADO=="OBSERVADO","SALIDA","ENTRADA")) %>%
-  group_by(COD_INST,ESTADO_AUX) %>%
+  mutate(ESTADO_AUX=ifelse(ESTADO=="VALIDADO"|ESTADO=="OBSERVADO","SALIDA","ENTRADA")) %>%
+  group_by(COD_IGA,ESTADO_AUX) %>%
   mutate(FLUJO_INV = row_number()) %>% #Hasta acá, lo que se hace es un recuento de cuantas entradas y salidas ha tenido el IGA en CSIG
   mutate(ESTADO_AUX_FLUJO=paste(ESTADO_AUX,FLUJO_INV,sep = "-")) %>%
-  group_by(COD_INST,FLUJO_INV) %>%
+  group_by(COD_IGA,FLUJO_INV) %>%
   mutate(F_ESTADO=as.Date(F_ESTADO)) %>%
   mutate(FLUJOS_PARES=ifelse(n()==2,"ENTRADA Y SALIDA","SOLO ENTRADA")) %>%
 
   summarise(F_MIN=min(F_ESTADO), F_MAX=(ifelse(FLUJOS_PARES=="ENTRADA Y SALIDA",max(F_ESTADO),NA))) %>%
-  group_by(COD_INST,FLUJO_INV) %>%
+  group_by(COD_IGA,FLUJO_INV) %>%
   mutate(F_MAX=as.Date(ifelse(is.na(F_MAX)==T,input$RANGO[2],F_MAX))) %>%
-  distinct(COD_INST, .keep_all = T) %>%
-  group_by(COD_INST) %>%
+  distinct(COD_IGA, .keep_all = T) %>%
+  group_by(COD_IGA) %>%
   mutate(FLUJO_INV=max(FLUJO_INV)-FLUJO_INV+1)
 
 
@@ -936,7 +898,7 @@ SUB_BD_HISTORIAL_3=SUB_BD_HISTORIAL_1 %>%
   mutate(DIAS=(F_MAX-F_MIN),MES=month(F_MIN),SEMANA=week(F_MIN),AÑO=year(F_MIN)) %>%
   mutate(F_SEMANA = lubridate::floor_date(F_MIN, "week")) %>%
   group_by(F_SEMANA) %>%
-  summarise(DIAS=mean(DIAS), IGAS= n_distinct(COD_INST), FLUJOS=n())
+  summarise(DIAS=mean(DIAS), IGAS= n_distinct(COD_IGA), FLUJOS=n())
 
 
 
@@ -944,20 +906,20 @@ SUB_BD_HISTORIAL_3=SUB_BD_HISTORIAL_1 %>%
 SUB_BD_HISTORIAL_2= BD_HISTORIAL %>%
   subset(F_ESTADO>=input$RANGO[1] & F_ESTADO<=input$RANGO[2]) %>%
   subset(ETAPA=="3) CSIG (CALIDAD)") %>%
-  mutate(ESTADO_AUX=ifelse(PROC_ESTADO=="VALIDADO"|PROC_ESTADO=="OBSERVADO","SALIDA","ENTRADA")) %>%
-  group_by(COD_INST,ESTADO_AUX) %>%
+  mutate(ESTADO_AUX=ifelse(ESTADO=="VALIDADO"|ESTADO=="OBSERVADO","SALIDA","ENTRADA")) %>%
+  group_by(COD_IGA,ESTADO_AUX) %>%
   mutate(FLUJO_INV = row_number()) %>%
   mutate(ESTADO_AUX_FLUJO=paste(ESTADO_AUX,FLUJO_INV,sep = "-")) %>%
-  group_by(COD_INST,FLUJO_INV) %>%
+  group_by(COD_IGA,FLUJO_INV) %>%
   mutate(F_ESTADO=as.Date(F_ESTADO)) %>%
   mutate(FLUJOS_PARES=ifelse(n()==2,"ENTRADA Y SALIDA","SOLO ENTRADA")) %>%
 
-  subset(ESTADO_AUX=="SALIDA", select=-c(ETAPA,OBS_DOC,F_ESTADO_HORA,REGISTRADOR)) %>%
+  subset(ESTADO_AUX=="SALIDA", select=-c(ETAPA,OBS_DOC,REGISTRADOR)) %>%
   mutate(DIAS=(F_ESTADO),MES=month(F_ESTADO),SEMANA=week(F_ESTADO),AÑO=year(F_ESTADO)) %>%
   mutate(F_SEMANA = floor_date(F_ESTADO, "week")) %>% #A partir de aquí, se calcula el avance semanal
-  group_by(F_SEMANA,PROC_ESTADO) %>%
+  group_by(F_SEMANA, ESTADO) %>%
   summarise(AUX=n()) %>%
-  spread(PROC_ESTADO,AUX)
+  spread(ESTADO,AUX)
 
 
 
@@ -1882,27 +1844,17 @@ BD_UNIV_ADM_UF=BD_ADM_UF %>%
   # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
   #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
   #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>% 
-  subset(UF_CON_IGA!="NO") %>%
+  # subset(UF_CON_IGA!="NO") %>%
   group_by(SUB_SECT) %>%
   summarise(UNIV_UF=n_distinct(COD_UF))
 
 
 
-
-
-
-
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CMIN=BD_INAF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>%
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
-  subset(SUB_SECT=="CMIN") %>%
+TAB_ESTADO_CMIN = BD_IGAS %>%
+
+  # subset(UF_CON_IGA!="NO") %>%
+  subset(SUB_SECT == "CMIN") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
   as.data.frame() %>%
@@ -2033,7 +1985,7 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CELE=BD_INAF %>%
+TAB_ESTADO_CELE=BD_IGAS %>%
   # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
   #       by.x = c("SUB_SECT","COD_UF"),
   #       by.y = c("SUBSECTOR","COD_UF"),
@@ -2041,7 +1993,7 @@ TAB_ESTADO_CELE=BD_INAF %>%
   # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
   #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
   #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+  # subset(UF_CON_IGA!="NO") %>%
   subset(SUB_SECT=="CELE") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
@@ -2162,7 +2114,7 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CHID=BD_INAF %>%
+TAB_ESTADO_CHID = BD_IGAS %>%
   # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
   #       by.x = c("SUB_SECT","COD_UF"),
   #       by.y = c("SUBSECTOR","COD_UF"),
@@ -2170,7 +2122,7 @@ TAB_ESTADO_CHID=BD_INAF %>%
   # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
   #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
   #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+  # subset(UF_CON_IGA!="NO") %>%
   subset(SUB_SECT=="CHID") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
@@ -2289,7 +2241,7 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CIND=BD_INAF %>%
+TAB_ESTADO_CIND=BD_IGAS %>%
   # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
   #       by.x = c("SUB_SECT","COD_UF"),
   #       by.y = c("SUBSECTOR","COD_UF"),
@@ -2297,7 +2249,7 @@ TAB_ESTADO_CIND=BD_INAF %>%
   # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
   #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
   #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+  # subset(UF_CON_IGA!="NO") %>%
   subset(SUB_SECT=="CIND") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
@@ -2419,15 +2371,9 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CPES=BD_INAF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>%
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+TAB_ESTADO_CPES = BD_IGAS %>%
+
+  # subset(UF_CON_IGA!="NO") %>%
   subset(SUB_SECT=="CPES") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
@@ -2554,16 +2500,9 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CRES=BD_INAF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>%
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
-  subset(SUB_SECT=="CRES") %>%
+TAB_ESTADO_CRES = BD_IGAS %>%
+ 
+  # subset(SUB_SECT == "CRES") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
   as.data.frame() %>%
@@ -2690,15 +2629,9 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ############################## ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_CAGR=BD_INAF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>%
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+TAB_ESTADO_CAGR = BD_IGAS %>%
+
+  # subset(UF_CON_IGA!="NO") %>%
   subset(SUB_SECT=="CAGR") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
@@ -2827,15 +2760,9 @@ unlink("TAB1.html") #Elimina el "temporal"
 ## ################################# ###
 
 #GENERANDO LA NUEVA BD
-TAB_ESTADO_TOT=BD_INAF %>%
-  # merge(y = subset(BD_UF_NO_IGA, is.na(COD_UF) == F),
-  #       by.x = c("SUB_SECT","COD_UF"),
-  #       by.y = c("SUBSECTOR","COD_UF"),
-  #       all.x = T) %>%
-  # mutate(UF_CON_IGA=case_when(UF_CON_IGA == "SI" ~ "SI",
-  #                             UF_CON_IGA == "NO_CUENTA_CON_LA_OBLIGACION" ~ "NO",
-  #                             is.na(UF_CON_IGA) == T ~ "PENDIENTE")) %>%
-  subset(UF_CON_IGA!="NO") %>%
+TAB_ESTADO_TOT = BD_IGAS %>%
+
+  # subset(UF_CON_IGA != "NO") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
   as.data.frame() %>%
@@ -3011,7 +2938,7 @@ unlink("TAB_TOT.html") #Elimina el "temporal"
 
 # Leer data y modificar un poco
 N_ARCHIVO = 'DEPARTAMENTOS.shp'
-DIR_ARCHIVO = paste('C:/Users/',USER,'/OEFA EN CIFRAS/2) DATA PROCESADA (ESTADISTICAS Y DATOS ABIERTOS)/3) HERRAMIENTAS DE PROCESAMIENTO (R)/3) SHAPE FILES/1) Departamentos-Regiones/',N_ARCHIVO,sep = "")
+DIR_ARCHIVO = paste('C:/Users/',USER,'/OEFA EN CIFRAS/X) OEFA EN CIFRAS/2) DATA PROCESADA (ESTADISTICAS Y DATOS ABIERTOS)/3) HERRAMIENTAS DE PROCESAMIENTO (R)/3) SHAPE FILES/1) Departamentos-Regiones/',N_ARCHIVO,sep = "")
 
 
 # Definir nombre y dirección del archivo
@@ -3023,15 +2950,15 @@ BD_DEPARTAMENTO = read_sf(DIR_ARCHIVO) %>%
 
 # Generando la nueva BD de Mapas
 BD_MAPA=BD_ADM_UF %>%
-  subset(select=c(COD_UF, COD_ADM, DEP_UF, PROV_UF, DIST_UF, SUB_SECT, ESTADO)) %>%
-  group_by(DEP_UF) %>% 
+  subset(select=c(COD_UF, COD_ADM, UF_DPTO, UF_PROV, UF_DIST, SUB_SECT, ESTADO_UF)) %>%
+  group_by(UF_DPTO) %>% 
   summarise(C_IGAS = n(), C_ADM = n_distinct(COD_ADM), C_UF = n_distinct(COD_UF))
   
   
 # Merge
 BD_DEPARTAMENTO = merge(BD_DEPARTAMENTO, BD_MAPA,
         by.x = c("NOMBDEP"),
-        by.y = c("DEP_UF"),
+        by.y = c("UF_DPTO"),
         all.x = T) %>%
   group_by(REGIONES) %>% 
   summarise(C_IGAS = sum(C_IGAS), C_ADM = sum(C_ADM), C_UF = sum(C_UF)) %>% 
@@ -3048,7 +2975,7 @@ ggplot() +
   coord_sf(crs = "+proj=robin")+
   ggeasy::easy_move_legend(to="right")+
   ggeasy::easy_add_legend_title("Igas por UF")+
-  scale_fill_continuous(high = OEFA.AZUL1, low = OEFA.JADE) 
+  scale_fill_continuous(high = PALETA.PRINCIPAL[1], low = PALETA.PRINCIPAL[4]) 
 
 
 
