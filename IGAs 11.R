@@ -227,10 +227,10 @@ BD_ARCH_AUX = BD_ARCH %>%
 # --------------------- -
 
 #COMBINAR CON OTRAS COLUMNAS DE TABLA TAREAS
-BD_IGAS=merge(BD_IGAS, BD_ARCH_AUX,
-              by.x="COD_IGA",
-              by.y="COD_IGA",
-              all.x=T) %>%
+BD_IGAS = merge(BD_IGAS, BD_ARCH_AUX,
+                by.x="COD_IGA",
+                by.y="COD_IGA",
+                all.x=T) %>%
   mutate(ARCH_SIZE_MB = ifelse(is.na(ARCH_SIZE_MB) == T, 0, ARCH_SIZE_MB)) %>%
   mutate(ARCH_SIZE_GB = ifelse(is.na(ARCH_SIZE_GB) == T, 0, ARCH_SIZE_GB)) #%>%
   # mutate(AUX=paste(COD_UF,SUB_SECT,sep = "-"))
@@ -373,27 +373,6 @@ BD_HISTORIAL = subset(BD_IGAS, select = c("COD_IGA","SUB_SECT_0","SUB_SECT","REG
 #############################################
 
 
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ########################################### ###
-# ##    IV) CREANDO UNAS FORMULAS PARA CONTEO    ####
-# ## ########################################### ###
-# 
-# fun <- function(x){
-#   c(cuenta=sum(!is.na(x)))
-# }
-# fun1 <- function(x){
-#   c(cuenta=sum((x)))
-# }
-# fun2 <- function(x){
-#   c(cuenta=count((x),na.rm =T ))
-# }
-# fun3 <- function(x){
-#   c(cuenta=unique((x),na.rm =T ))
-# }
-# 
-# ##################################################
-
 
 # __________________________________________________________________________________________________________________________________________________________
 
@@ -428,39 +407,44 @@ ESCAL_CONV=0.026458333
 # GENERANDO TABLA CON CALCULO DE IGAS CON OBSERVACIONES
 SUB_BD_HISTORIAL=BD_HISTORIAL %>%
   # subset(SUB_SECT %in% input$LISTA) %>%
-  mutate(OBS_ERRORES = ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor") == T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit") == T | is.na(OBS_DOC) == T,"AUTOCORRECCION/SIN OBS","OBSERVACION")) %>%  #Distinguir los casos realmente catalogados como observaciones
-  subset(F_ESTADO >= input$RANGO[1] & F_ESTADO <= input$RANGO[2]) %>%
-  mutate(C_FLUJOS = 1, OBS = ifelse(ESTADO== "OBSERVADO", 1, 0)) %>%
-  group_by(SUB_SECT,ESTADO,COD_IGA,ETAPA,OBS_ERRORES) %>%
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), OBS = sum(OBS,na.rm = TRUE)) %>%
+  mutate(OBS_ERRORES = ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor") == T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit") == T | is.na(OBS_DOC) == T,
+                              "AUTOCORRECCION/SIN OBS",
+                              "OBSERVACION")) %>%  #Distinguir los casos realmente catalogados como observaciones
+  subset(F_ESTADO >= input$RANGO[1] & F_ESTADO <= input$RANGO[2]) %>%  #Acotando el rango de precio
+  mutate(C_FLUJOS = 1, OBS = ifelse(ESTADO== "OBSERVADO", 1, 0)) %>%  #Contar los casos que corresponden a las observaciones
   
-  mutate(OBS=ifelse(OBS>=1,1,0),
-         CASOS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)",1,0),
-         OBS_COORD = ifelse(ETAPA == "2) REVISOR" & OBS == 1 , 1, 0),
-         OBS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)" & OBS == 1 & OBS_ERRORES == "OBSERVACION",1,0)) %>% #Cantidad de OBSERVACIONES REALIZADAS POR CSIG
-  
-  group_by(COD_IGA,SUB_SECT, ESTADO) %>%
+  group_by(SUB_SECT,COD_IGA,ETAPA,OBS_ERRORES) %>%  #A nivel de IGA, subsector, etapa y Observaciones....
   summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
-            OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), 
-            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
-            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE)) %>%
+            OBS = sum(OBS,na.rm = TRUE)) %>%  #Contabilizar la cantidad de flujos y observaciones 
+  mutate(OBS = ifelse(OBS>=1,1,0),  #Categorizar para definir si cada IGA tienen alguna observación en general
+         CASOS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)",1,0),  #Determinar el caso llegó a CSIG
+         OBS_COORD = ifelse(ETAPA == "2) REVISOR" & OBS == 1 , 1, 0),  #Determinar si el caso fue observado por la coordinación
+         OBS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)" & OBS == 1 & OBS_ERRORES == "OBSERVACION",1,0)) %>%  #Determinar si el caso fue observado en CSIG
   
-  mutate(OBS=ifelse(OBS >= 1,1,0),
-         CASOS_COORD = 1) %>%
-  group_by(SUB_SECT) %>%
+  group_by(COD_IGA,SUB_SECT) %>%  #A nivel de IGA e subsector....
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE),  #Cantidad total de flujos
+            OBS = sum(OBS,na.rm = TRUE),  #Cantidad total de observaciones
+            OBS_CSIG = sum(OBS_CSIG,na.rm = TRUE),  #Cantidad total de observaciones en CSIG
+            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE),  #Cantidad total de casos en CSIG
+            OBS_COORD = sum(OBS_COORD,na.rm = TRUE)) %>%   #Cantidad total de observaciones del coordinador
+  mutate(OBS = ifelse(OBS >= 1,1,0),  #Recategorizar si en general, algun caso tuvo una observacion
+         OBS_CSIG = ifelse(OBS_CSIG >= 1,1,0),  #Determinar si algun caso tuvo observación de CSIG
+         CASOS_CSIG = ifelse(CASOS_CSIG >= 1,1,0),  #Determinar si algun caso llegó a la bandeja de CSIG
+         OBS_COORD = ifelse(OBS_COORD >= 1,1,0),  #Determinar si algun caso tuvo observación del coordinador
+         CASOS_COORD = 1) %>%  #Dado que todos los casos de historial han llegado a la bandeja del coordinador, se crea una columna de "unos"
+
+  group_by(SUB_SECT) %>%  #A nivel de subsector....
+  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), # Cantidad de flujos
+            OBS=sum(OBS,na.rm = TRUE),  #Cantidad de Igas con alguna observaciones
+            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE),  #Cantidad de Igas con alguna observaciones de CSIG
+            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE),  #Cantidad de Igas que llegaron a la bandeja de CSIG
+            OBS_COORD=sum(OBS_COORD,na.rm = TRUE),  #Cantidad de Igas con alguna observaciones del coordinador
+            CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>% #Cantidad de Igas que llegaron a la bandeja del coordinador
   
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
-            OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE), 
-            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
-            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE), 
-            CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>%
-  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1), 
-         PORC_CASOS_OBS_CSIG=round(100*(1-OBS_CSIG/CASOS_CSIG),1)) %>%
-  subset(is.na(SUB_SECT)==F)
-
-
+  mutate(PORC_CASOS_OBS_CSIG = round(100*(1-OBS_CSIG/CASOS_CSIG),1),  #Porcentaje de IGAs que NO tuvieron observaciones en CSIG
+         PORC_CASOS_OBS_COORD = round(100*(1-OBS_COORD/CASOS_COORD),1)) %>%  #Porcentaje de IGAs que NO tuvieron observaciones en etapa de coordinador
+  
+  subset(is.na(SUB_SECT) == F)
 
 
 
@@ -471,29 +455,44 @@ TABLA_UNIV_ADM_UF=BD_ADM_UF %>%
   summarise(UNIV_UF=n_distinct(COD_UF))
 
 
-
-TABLA_RESUMEN_1= subset(BD_IGAS,F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>% #
-  group_by(COD_UF,SUB_SECT) %>%
-  summarise(C_IGAS = n()) %>%
-  merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),
+# GENERANDO LA TABLA FINAL
+TABLA_RESUMEN_1= BD_IGAS %>% 
+  subset(F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>%  #Acotando fechas
+  group_by(COD_UF,SUB_SECT) %>%  #Agrupando por UF y subsector...
+  summarise(C_IGAS = n(),
+            C_IGAS_AP_COOR = sum(ETAPA == "3) CSIG (CALIDAD)")) %>%  #Determminar la cantidad de IGAS
+  merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),  #Combinar con la característica de las UF
         by.x=c("COD_UF","SUB_SECT"),
         by.y=c("COD_UF","SUB_SECT"),
-        all.x=T)%>%  # CONTRADICCION (HAY UF QUE SUPUESTAMENTE NO DEBIERAN TENER IGAS, SIN EMBARGO, SIN LOS TIENEN [Cuando se activa la variable de si debiera contar con IGA])
-  group_by(SUB_SECT) %>%
-  summarise(TOT_IGA_INAF=sum(C_IGAS),MEDIA_IGA_UF=mean(C_IGAS),MEDIANA_IGA_UF=median(C_IGAS),DS_IGA_UF=sd(C_IGAS),media_T=mean(C_IGAS), Q3_IGA_UF=quantile(C_IGAS, 0.74),UNIV_UF_INAF=n_distinct(COD_UF)) %>%
-  merge(TABLA_UNIV_ADM_UF,
+        all.x=T) %>%  # CONTRADICCION (HAY UF QUE SUPUESTAMENTE NO DEBIERAN TENER IGAS, SIN EMBARGO, SIN LOS TIENEN [Cuando se activa la variable de si debiera contar con IGA])
+  subset(is.na(COD_UF) == F) %>% 
+  group_by(SUB_SECT) %>%  #Agrupando por subsector...
+  summarise(TOT_IGA_INAF=sum(C_IGAS),  #Cantidad de IGAS (de aquellas UF con al menos un IGA)
+            TOT_IGA_INAF_AP_COOR=sum(C_IGAS_AP_COOR),
+            MEDIA_IGA_UF=mean(C_IGAS),  #Promedio de IGAS por UF
+            MEDIANA_IGA_UF=median(C_IGAS),
+            DS_IGA_UF=sd(C_IGAS),
+            media_T=mean(C_IGAS), 
+            Q3_IGA_UF=quantile(C_IGAS, 0.74),
+            UNIV_UF_INAF=n_distinct(COD_UF)) %>%
+  
+  merge(TABLA_UNIV_ADM_UF,  #Combinar con el universo de UF por sector
         by.x="SUB_SECT",
         by.y="SUB_SECT",
         all.x=T) %>%
-  subset(is.na(SUB_SECT)==F) %>%
-  mutate(MEDIA_AJUST=MEDIA_IGA_UF+DS_IGA_UF*(1-(UNIV_UF_INAF/UNIV_UF)), E_UNIV_IGAS=ceiling(MEDIA_AJUST*UNIV_UF), AVANCE_IGA=TOT_IGA_INAF/E_UNIV_IGAS) %>%
+  subset(is.na(SUB_SECT)==F) %>%  #Eliminar casos que sobran
+  mutate(MEDIA_AJUST = MEDIA_IGA_UF+DS_IGA_UF*(1-(UNIV_UF_INAF/UNIV_UF)),  #Ajustado del promedio de IGAS por UF
+         E_UNIV_IGAS = ceiling(MEDIA_AJUST*UNIV_UF),   #Estimado del Universo de IGAS
+         AVANCE_IGA = TOT_IGA_INAF/E_UNIV_IGAS,  #Calculo del avance sobre este universo
+         AVANCE_IGA_AP_COOR = TOT_IGA_INAF_AP_COOR/E_UNIV_IGAS) %>%  #Calculo del avance de lo aprobado por el coord, sobre este universo
   merge(SUB_BD_HISTORIAL,
         by.x="SUB_SECT",
         by.y="SUB_SECT",
         all.x=T) %>%
-  mutate(AVANCE_IGA=100*round(AVANCE_IGA,3)) %>%
+  mutate(AVANCE_IGA=100*round(AVANCE_IGA,3),
+         AVANCE_IGA_AP_COOR=100*round(AVANCE_IGA_AP_COOR,3)) %>%
   subset(is.na(TOT_IGA_INAF)==F) %>%
-  mutate(AVANCE_IGA=ifelse(SUB_SECT=="CRES",100,AVANCE_IGA)) %>%
+  # mutate(AVANCE_IGA=ifelse(SUB_SECT=="CRES",100,AVANCE_IGA)) %>%
   as.data.frame()
 
 
@@ -501,13 +500,13 @@ TABLA_RESUMEN_1= subset(BD_IGAS,F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RAN
 
 
 #GRAFICANDO
-BUBBLE_GRAPH1=ggplot(TABLA_RESUMEN_1)+
-  annotate("rect", xmin = 0, xmax = 60, ymin = 50, ymax = 102, 
+BUBBLE_GRAPH1 = ggplot(TABLA_RESUMEN_1)+
+  annotate("rect", xmin = 0, xmax = 60, ymin = 40, ymax = 102, 
            alpha = 0.1, fill = "firebrick") + 
-  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, 
+  annotate("rect", xmin = 0, xmax = 102, ymin = 40, ymax = 90, 
            alpha = 0.1, fill = "firebrick") + 
-  geom_point(aes(x=AVANCE_IGA,y=PORC_CASOS_OBS_CSIG,size=TOT_IGA_INAF,color=SUB_SECT), alpha=0.8)+
-  scale_color_manual(values=c(PALETA.PRINCIPAL))+
+  geom_point(aes(x = AVANCE_IGA, y = PORC_CASOS_OBS_CSIG, size = TOT_IGA_INAF, color = SUB_SECT), alpha=0.8)+
+  scale_color_manual(values = c(PALETA.PRINCIPAL))+
   ggeasy::easy_all_text_size(size = 15)+
   theme_minimal()+
   theme(panel.grid.minor = element_blank(),
@@ -515,7 +514,7 @@ BUBBLE_GRAPH1=ggplot(TABLA_RESUMEN_1)+
         plot.title = element_text(size = 18, face = "bold"))+
   
   scale_x_continuous(limits = c(0, 102), breaks = seq(0,100,10), expand = c(0, 0)) +
-  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+
+  scale_y_continuous(limits = c(40, 102), breaks = seq(0,100,10), expand = c(0, 0))+
   
   labs(x="IGAs en INAF* (%)",
        y="\nIGA sin observaciones (%)",
@@ -547,9 +546,6 @@ BUBBLE_GRAPH1
 
 ggsave("0.3.1) OBSERVACIONES-ACTUAL.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
 
-
-
-
 #############################################################
 
 
@@ -559,100 +555,14 @@ ggsave("0.3.1) OBSERVACIONES-ACTUAL.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height 
 ##    1.2) AVANCE VS OBSERVACIONES A NIVEL DE COORDINADOR    ####
 ## ######################################################### ###
 
-# GENERANDO TABLA CON CALCULO DE IGAS CON OBSERVACIONES
-SUB_BD_HISTORIAL=BD_HISTORIAL %>%
-  # subset(SUB_SECT %in% input$LISTA) %>%
-  mutate(OBS_ERRORES = ifelse((str_detect(OBS_DOC, "(?i)registrador|(?i)coordinador|(?i)revisor") == T) & str_detect(OBS_DOC, "(?i)dev|(?i)solicit")==T | is.na(OBS_DOC)==T,"AUTOCORRECCION/SIN OBS","OBSERVACION")) %>%  #Distinguir los casos realmente catalogados como observaciones
-  subset(F_ESTADO >= input$RANGO[1] & F_ESTADO <= input$RANGO[2]) %>%
-  mutate(C_FLUJOS = 1, OBS = ifelse(ESTADO== "OBSERVADO", 1, 0)) %>%
-  group_by(SUB_SECT,ESTADO,COD_IGA,ETAPA,OBS_ERRORES) %>%
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), OBS = sum(OBS,na.rm = TRUE)) %>%
-  
-  mutate(OBS=ifelse(OBS>=1,1,0),
-         CASOS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)",1,0),
-         OBS_COORD = ifelse(ETAPA == "2) REVISOR" & OBS == 1 , 1, 0),
-         OBS_CSIG = ifelse(ETAPA == "3) CSIG (CALIDAD)" & OBS == 1 & OBS_ERRORES == "OBSERVACION",1,0)) %>% #Cantidad de OBSERVACIONES REALIZADAS POR CSIG
-  
-  group_by(COD_IGA,SUB_SECT, ESTADO) %>%
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
-            OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG=sum(CASOS_CSIG,na.rm = TRUE), 
-            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
-            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE)) %>%
-  
-  mutate(OBS=ifelse(OBS >= 1,1,0),
-         CASOS_COORD = 1) %>%
-  group_by(SUB_SECT) %>%
-  
-  summarise(C_FLUJOS = sum(C_FLUJOS,na.rm = TRUE), 
-            OBS=sum(OBS,na.rm = TRUE),
-            CASOS_CSIG = sum(CASOS_CSIG,na.rm = TRUE), 
-            OBS_COORD=sum(OBS_COORD,na.rm = TRUE), 
-            OBS_CSIG=sum(OBS_CSIG,na.rm = TRUE), 
-            CASOS_COORD=sum(CASOS_COORD,na.rm = TRUE)) %>%
-  mutate(PORC_CASOS_OBS_COORD=round(100*(1-OBS_COORD/CASOS_COORD),1), 
-         PORC_CASOS_OBS_CSIG=round(100*(1-OBS_CSIG/CASOS_CSIG),1)) %>%
-  subset(is.na(SUB_SECT)==F)
-
-
-
-TABLA_UNIV_ADM_UF=BD_ADM_UF %>%
-  # subset(UF_CON_IGA!="NO") %>% #ACTIVAR CUANDO SE TENGA EL CAMPO
-  group_by(SUB_SECT) %>%
-  summarise(UNIV_UF=n_distinct(COD_UF))
-
-
-TABLA_RESUMEN_2=subset(BD_IGAS, F_REG_IGA>=input$RANGO[1] & F_REG_IGA<=input$RANGO[2]) %>%
-  group_by(COD_UF,SUB_SECT) %>%
-  summarise(C_IGAS = n()) %>%
-  merge(distinct(BD_ADM_UF, COD_UF, .keep_all = TRUE),
-        by.x=c("COD_UF","SUB_SECT"),
-        by.y=c("COD_UF","SUB_SECT"),
-        all.x=T)%>%
-  # rename( SUB_SECT=SUB_SECT.x) %>%
-  group_by(SUB_SECT) %>%
-  summarise(TOT_IGA_INAF=sum(C_IGAS),MEDIA_IGA_UF=mean(C_IGAS),MEDIANA_IGA_UF=median(C_IGAS),DS_IGA_UF=sd(C_IGAS),media_T=mean(C_IGAS), Q3_IGA_UF=quantile(C_IGAS, 0.74),UNIV_UF_INAF=n_distinct(COD_UF)) %>%
-  merge(TABLA_UNIV_ADM_UF,
-        by.x="SUB_SECT",
-        by.y="SUB_SECT",
-        all.x=T) %>%
-  subset(is.na(SUB_SECT) == F) %>%
-  mutate(MEDIA_AJUST = MEDIA_IGA_UF+DS_IGA_UF*(1-(UNIV_UF_INAF/UNIV_UF)), E_UNIV_IGAS=ceiling(MEDIA_AJUST*UNIV_UF), AVANCE_IGA = TOT_IGA_INAF/E_UNIV_IGAS) %>%
-  merge(SUB_BD_HISTORIAL,
-        by.x="SUB_SECT",
-        by.y="SUB_SECT",
-        all.x = T) %>%
-  mutate(AVANCE_IGA=100*round(AVANCE_IGA,3)) %>%
-  subset(is.na(TOT_IGA_INAF) == F) %>%
-  mutate(AVANCE_IGA = ifelse(SUB_SECT == "CRES",100, AVANCE_IGA)) %>%
-  as.data.frame()
-
-
-
-TABLA_RESUMEN_3 = subset(BD_IGAS, ETAPA == "3) CSIG (CALIDAD)") %>%
-  group_by(COD_UF, SUB_SECT) %>%
-  summarise(C_IGAS = n()) %>%
-  group_by(SUB_SECT) %>%
-  summarise(IGAS_CSIG = sum(C_IGAS)) %>%
-  merge(TABLA_RESUMEN_2,
-        by.x = "SUB_SECT",
-        by.y = "SUB_SECT",
-        all.x = T) %>%
-  mutate(AVANCE_IGA_CSIG = 100*round(IGAS_CSIG/E_UNIV_IGAS, 3)) %>%
-  mutate(AVANCE_IGA_CSIG = ifelse(SUB_SECT == "CRES",100, AVANCE_IGA_CSIG))
-
-
-
-
-
 #GRAFICANDO
-BUBBLE_GRAPH2=ggplot(TABLA_RESUMEN_3)+
-  annotate("rect", xmin = 0, xmax = 50, ymin = 50, ymax = 102, 
+BUBBLE_GRAPH2=ggplot(TABLA_RESUMEN_1)+
+  annotate("rect", xmin = 0, xmax = 50, ymin = 40, ymax = 102, 
            alpha = 0.1, fill = "firebrick") + 
-  annotate("rect", xmin = 0, xmax = 102, ymin = 50, ymax = 90, 
+  annotate("rect", xmin = 0, xmax = 102, ymin = 40, ymax = 90, 
            alpha = 0.1, fill = "firebrick") + 
   
-  geom_point(aes(x=AVANCE_IGA_CSIG,y=PORC_CASOS_OBS_CSIG,size=TOT_IGA_INAF,color=SUB_SECT), alpha=0.8)+
+  geom_point(aes(x=AVANCE_IGA_AP_COOR,y=PORC_CASOS_OBS_CSIG,size=TOT_IGA_INAF,color=SUB_SECT), alpha=0.8)+
   scale_color_manual(values=c(PALETA.PRINCIPAL))+
   
   ggeasy::easy_all_text_size(size = 15)+
@@ -662,7 +572,7 @@ BUBBLE_GRAPH2=ggplot(TABLA_RESUMEN_3)+
         plot.title = element_text(size=18,face = "bold"))+
   
   scale_x_continuous(limits = c(0, 102), breaks = seq(0,100,10), expand = c(0, 0)) + 
-  scale_y_continuous(limits = c(50, 102), breaks = seq(0,100,10), expand = c(0, 0))+
+  scale_y_continuous(limits = c(40, 102), breaks = seq(0,100,10), expand = c(0, 0))+
   
   labs(x="IGAs aprobado por los coordinadores en INAF* (%)",
        y="\nIGA sin observaciones (%)",
@@ -673,7 +583,7 @@ BUBBLE_GRAPH2=ggplot(TABLA_RESUMEN_3)+
                         sep = ""),
        caption = "Fuente: INAF\n*Estimado")+
   scale_size(range = c(0.5,25), name="Cantidad de IGA\nregistrados en INAF")+
-  geom_point(aes(x=AVANCE_IGA_CSIG,y=PORC_CASOS_OBS_CSIG,size=1))+        
+  geom_point(aes(x=AVANCE_IGA_AP_COOR,y=PORC_CASOS_OBS_CSIG,size=1))+        
   geom_hline(yintercept=90, linetype="dashed", color = "red", size=1)+
   geom_vline(xintercept=50, linetype="dashed", color = "red", size=1)+
   
@@ -805,63 +715,6 @@ write.csv(TAB_RES_CLAUDIA,file="Tabla resumen.csv", na="")
 
 #############################################
 
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################### ###
-# ##    1.4) GRAFICO KERNEL RATIO UNIVERSO ESTIMADO DE IGAS    ####
-# ## ######################################################### ###
-# 
-# 
-# BD_RESUMEN_2.1=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>%  #Acotamos fechas
-#   group_by(COD_UF,SUB_SECT) %>%  #Agrupamos por UF y SUBSECTOR
-#   summarise(C_IGAS = n()) #%>%  #Calculamos la cantidad de IGAS
-# BD_RESUMEN_2.2=subset(BD_INAF, F_REG>=input$RANGO[1] & F_REG<=input$RANGO[2]) %>%  #Acotamos fechas
-#   group_by(COD_UF,SUB_SECT) %>%  #Agrupamos por UF y SUBSECTOR
-#   summarise(C_IGAS = n()) %>%
-#   group_by(SUB_SECT) %>%  #Agrupamos por UF y SUBSECTOR
-#   summarise(C_IGAS.mean = mean(C_IGAS))
-# BD_RESUMEN_2.3=merge(
-#   BD_RESUMEN_2.1,
-#   BD_RESUMEN_2.2,
-#   by.x="SUB_SECT",
-#   by.y="SUB_SECT",
-#   all.x=T
-# )
-# 
-# 
-# 
-# li=0
-# ls=5
-# ggplot(BD_RESUMEN_2.3, aes(x = C_IGAS, group = SUB_SECT, fill = SUB_SECT, alpha=0.8)) +
-#   geom_density(scale= 1, bandwidth = 2, quantile_lines = TRUE, quantiles = 2,vline_size=1) +
-#   scale_x_continuous(limits =  c(li, ls), breaks = seq(li, ls, by=0.5),minor_breaks = seq(li, ls, by=1)) +
-#   theme(legend.position = "none")+
-#   scale_fill_manual(values=c(PALETA.PRINCIPAL))+
-#   theme_ridges() +
-#   theme(legend.position = "none",
-#         panel.grid.minor = element_line(colour = "gray90",linetype="dashed"),
-#         panel.grid.major = element_line(colour = "gray70"))+
-#   geom_vline(aes(xintercept=(C_IGAS.mean), color=SUB_SECT, group=SUB_SECT), linetype="dashed", size=1)+
-# 
-#   labs(x="IGA por UF", #, x="Sub sector"
-#        title = "Cantidad promedio de IGA por UF, por sub sector", 
-#        subtitle = "",
-#        caption = paste("Fuente: INAF\nFecha de corte: ",format(as.Date(input$RANGO[2],"%Y-%m-%d"),"%d/%m/%Y"),")",sep = ""))+
-#          facet_wrap(.~SUB_SECT, 
-#                     #scales="free_x",
-#                     ncol = 1,
-#                     labeller = label_value,
-#                     strip.position = "bottom")#+ 
-#   
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# ################################################################
 
       
 # __________________________________________________________________________________________________________________________________________________________
@@ -1074,760 +927,6 @@ unlink("TAB_PIFA.html") #Elimina el "temporal"
 
 #############################
 
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################### ###
-# ##   3) AVANCE TOTAL: 1) Evolución de la cantidad de IGA's   ####
-# ## ######################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF=BD_INAF %>%
-#   group_by(F_REG) %>%
-#   summarise(AUX=n()) %>%
-#   mutate(F_REG=as.Date(F_REG))
-# 
-# 
-# #GRÁFICO ACUMULADO
-# AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, cumsum(AUX))) +
-#   geom_line(color=OEFA.AZUL1, size=1.5) +
-#   #stat_smooth(se=FALSE)+
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_y_continuous(breaks = seq(0,20000,2000))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de IGA",
-#        title = "Evolución de la cantidad de IGA en INAF (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA_TOT
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("1.1) Avance acumulado total.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# 
-# ################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ############################################################ ###
-# ##   3) AVANCE TOTAL: 2) Evolución de la cantidad de archivos   ####
-# ## ############################################################ ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF=BD_INAF %>%
-#   group_by(F_REG) %>%
-#   summarise(N_ARCH=sum(N_ARCH)) %>%
-#   mutate(F_REG=as.Date(F_REG))
-# 
-# 
-# #GR?FICO ACUMULADO
-# AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, cumsum(N_ARCH))) +
-#   geom_line(color=OEFA.AZUL1, size=1.5) +
-#   #stat_smooth(se=FALSE)+
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de archivos",
-#        title = "Evolución de la cantidad de archivos en INAF (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA_TOT
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("1.2) Avance ARCHIVOS acumulado total.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# ###################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ###################################################### ###
-# ##   3) AVANCE TOTAL: 3) Evolución de la cantidad de MB   ####
-# ######################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF=BD_INAF %>%
-#   group_by(F_REG) %>%
-#   summarise(ARCH_SIZE_MB=sum(ARCH_SIZE_MB)/1024) %>%
-#   mutate(F_REG=as.Date(F_REG))
-# 
-# 
-# #GRÁFICO ACUMULADO
-# AVANCE_REG_DIA_TOT <- ggplot(SUB_BD_INAF,aes(F_REG, cumsum(ARCH_SIZE_MB))) +
-#   geom_line(color=OEFA.AZUL1, size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de GB",
-#        title = "Evolución de la cantidad de GB en INAF (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA_TOT
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("1.3) Avance MB acumulado total.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# 
-# #############################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ############################################################ ###
-# ##   3) AVANCE TOTAL: 4) Evolución de IGAs total y validados    ####
-# ## ############################################################ ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF_X=BD_INAF %>%
-#   group_by(F_REG, ESTADO_AUX) %>%
-#   summarise(AUX=n()) %>%
-#   mutate(F_REG=as.Date(F_REG)) %>%
-#   group_by(ESTADO_AUX) %>%
-#   mutate(AUX2 = cumsum(AUX)) %>%
-#   mutate(ESTADO_AUX = ifelse(is.na(ESTADO_AUX)==T,"No validado",ESTADO_AUX))
-# 
-# 
-# #GR?FICO ACUMULADO SOLO UF CRITICAS
-# AVANCE_REG_DIA_TOT_VAL <- ggplot(SUB_BD_INAF_X,aes(F_REG, AUX2, group = ESTADO_AUX, color = factor(ESTADO_AUX))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(OEFA.AZUL1, OEFA.JADE))+
-#     #stat_smooth(se=FALSE)+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de registros",
-#        title = "Evolución de la cantidad de registros en INAF, por estado del proceso de validación*.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia\n*Los casos validados son aquellos que pasaron por la revisión de los coordinadores y de CSIG")+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   theme(legend.position = "bottom",legend.title = element_blank())+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# 
-# AVANCE_REG_DIA_TOT_VAL
-# 
-# #GUARDANDO EL GRÁFICO
-# ggsave("1.4) Avance por proceso.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# 
-# ###################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ################################################################## ###
-# ##   3) AVANCE TOTAL: 5) Evolución de archivos totales y validados    ####
-# ## ################################################################## ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF_X=as.data.frame(subset(BD_INAF))
-# SUB_BD_INAF_X$AUX=1
-# 
-# #CREAR TABLA RESUMEN
-# SUB_BD_INAF_X=summaryBy(N_ARCH ~ F_REG+ESTADO_AUX, FUN=sum, data =as.data.frame(SUB_BD_INAF_X),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
-# SUB_BD_INAF_X$F_REG=as.Date(SUB_BD_INAF_X$F_REG)
-# 
-# #CREANDO CAMPO CONTEO ACUMULADO
-# SUB_BD_INAF_X = mutate(group_by(SUB_BD_INAF_X,ESTADO_AUX),"AUX2" = cumsum(N_ARCH))
-# 
-# 
-# #GR?FICO ACUMULADO SOLO UF CRITICAS
-# AVANCE_REG_DIA_TOT_VAL <- ggplot(SUB_BD_INAF_X,aes(F_REG, AUX2, group = ESTADO_AUX, color = factor(ESTADO_AUX))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(OEFA.AZUL1, OEFA.JADE))+
-#   #stat_smooth(se=FALSE)+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de archivos",
-#        title = "Evolución de la cantidad de archivos en INAF, por estado del proceso de validación*.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia\n*Los casos validados son aquellos que pasaron por la revisión de los coordinadores y de CSIG")+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   theme(legend.position = "bottom",legend.title = element_blank())+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA_TOT_VAL
-# 
-# #GUARDANDO EL GRÁFICO
-# ggsave("1.5) Avance por proceso.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# 
-# #########################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ################################################### ###
-# ##   3) AVANCE TOTAL: 6) Evolución de IGA de UF y UFC  ####
-# ## ################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF_3=BD_INAF_PRIOR %>%
-#   group_by(F_REG, CASO_PRIOR) %>%
-#   summarise(AUX=n()) %>%
-#   mutate(F_REG=as.Date(F_REG)) %>%
-#   group_by(CASO_PRIOR) %>%
-#   mutate(AUX2 = cumsum(AUX)) 
-# 
-# 
-# #GR?FICO ACUMULADO
-# AVANCE_REG_DIA_TOT_Y_UFC <- ggplot(SUB_BD_INAF_3,aes(F_REG, AUX2, group = CASO_PRIOR, color = factor(CASO_PRIOR))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(OEFA.AZUL1,OEFA.TURQUEZA),labels=c("UF no priorizados","UF priorizados"),name = "")+
-#   #stat_smooth(se=FALSE)+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de IGA",
-#        title = "Evolución de la cantidad de IGA en INAF (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-#   
-# AVANCE_REG_DIA_TOT_Y_UFC
-# 
-# #GUARDANDO EL GRÁFICO
-# ggsave("1.6) Avance acumulado Totales y UFC.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# 
-# ##########################################################
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ########################################################## ###
-# ##   3) AVANCE TOTAL: 7) Evolución de archivos de UF y UFC    ####
-# ## ########################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF_3=as.data.frame(BD_INAF_PRIOR)
-# SUB_BD_INAF_3$AUX=1
-# 
-# #CREAR TABLA RESUMEN
-# SUB_BD_INAF_3=summaryBy(N_ARCH ~ F_REG+CASO_PRIOR, FUN=sum, data =as.data.frame(SUB_BD_INAF_3),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
-# SUB_BD_INAF_3$F_REG=as.Date(SUB_BD_INAF_3$F_REG)
-# 
-# #CREANDO CAMPO CONTEO ACUMULADO
-# SUB_BD_INAF_3 = mutate(group_by(SUB_BD_INAF_3,CASO_PRIOR),"AUX2" = cumsum(N_ARCH))
-# 
-# #GR?FICO ACUMULADO
-# AVANCE_REG_DIA_TOT_Y_UFC <- ggplot(SUB_BD_INAF_3,aes(F_REG, AUX2, group = CASO_PRIOR, color = factor(CASO_PRIOR))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(OEFA.AZUL1,OEFA.TURQUEZA),labels=c("UF no priorizadas","UF priorizadas"),name = "")+
-#   #stat_smooth(se=FALSE)+
-#   theme_minimal()+
-#   theme(legend.position = "bottom",
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de archivos",
-#        title = "Evolución de la cantidad de archivos en INAF (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-# 
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA_TOT_Y_UFC
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("1.7) Avance archivos acumulado Totales y UFC.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# # #CREANDO GIF
-# # AVANCE_REG_DIA_TOT_Y_UFC=AVANCE_REG_DIA_TOT_Y_UFC + transition_reveal(F_REG)
-# # animate(AVANCE_REG_DIA_TOT_Y_UFC, duration=DURACION, fps=FPS, width=ANCHO, height=ALTO, res=RES, renderer = gifski_renderer(loop = F))
-# #
-# # anim_save("1.7) Avance archivos acumulado Totales y UFC.gif")
-# 
-# 
-# #################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################## ###
-# ##   4) AVANCE POR AREA: 1) Evolución del registro de IGA   ####
-# ## ######################################################## ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF1=BD_INAF %>%
-#   group_by(F_REG, SUB_SECT) %>%
-#   summarise(AUX=n()) %>%
-#   mutate(F_REG=as.Date(F_REG)) %>%
-#   group_by(SUB_SECT) %>%
-#   mutate(AUX2 = cumsum(AUX)) 
-# 
-# 
-# #CREANDO CAMPO CONTEO ACUMULADO
-# AVANCE_REG_DIA <- ggplot(SUB_BD_INAF1,aes(F_REG, AUX2, group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", legend.title = element_blank(), 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de IGA",
-#        title = "Evolución de la cantidad de IGA en INAF, por coordinación (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA
-# 
-# #GUARDANDO EL GRÁFICO
-# ggsave("2.1) Evolución por area.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# ###############################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ############################################################## ###
-# ##   4) AVANCE POR AREA: 2) Evolución del registro de archivos    ####
-# ## ############################################################## ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF1=as.data.frame(BD_INAF)
-# SUB_BD_INAF1$AUX=1
-# 
-# #CREAR TABLA RESUMEN
-# SUB_BD_INAF1=summaryBy(N_ARCH ~ F_REG+SUB_SECT, FUN=sum, data =as.data.frame(SUB_BD_INAF1),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
-# SUB_BD_INAF1$F_REG=as.Date(SUB_BD_INAF1$F_REG)
-# 
-# #CREANDO CAMPO CONTEO ACUMULADO
-# SUB_BD_INAF1 = mutate(group_by(SUB_BD_INAF1,SUB_SECT),"AUX2" = cumsum(N_ARCH))
-# AVANCE_REG_DIA <- ggplot(SUB_BD_INAF1,aes(F_REG, AUX2, group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", legend.title = element_blank(), 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de archivos",
-#        title = "Evolución de la cantidad de archivos en INAF, por coordinación (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("2.2) Evolución archivos por area.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# #####################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################### ###
-# ##   4) AVANCE POR AREA: 3) Evolución de la cantidad de MB   ####
-# ## ######################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF1=as.data.frame(BD_INAF)
-# SUB_BD_INAF1$AUX=1
-# 
-# #CREAR TABLA RESUMEN
-# SUB_BD_INAF1=summaryBy(ARCH_SIZE_MB ~ F_REG+SUB_SECT, FUN=sum, data =as.data.frame(SUB_BD_INAF1),keep.names = T) #Para mantener el nombre de la variable usar: keep.names = T
-# SUB_BD_INAF1$F_REG=as.Date(SUB_BD_INAF1$F_REG)
-# 
-# 
-# #CREANDO CAMPO CONTEO ACUMULADO
-# SUB_BD_INAF1 = mutate(group_by(SUB_BD_INAF1,SUB_SECT),"AUX2" = cumsum(ARCH_SIZE_MB)/1024)
-# AVANCE_REG_DIA <- ggplot(SUB_BD_INAF1,aes(F_REG, AUX2, group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1.5) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 week"))+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   theme_minimal()+
-#   theme(legend.position = "bottom", legend.title = element_blank(), 
-#         panel.grid.minor = element_blank(),
-#         axis.line = element_line(colour = "black",color="black", arrow =arrow(angle = 30,length = unit(.1,"inches"),type = "closed")))+
-#   labs(x="",
-#        y="Cantidad de GB",
-#        title = "Evolución de la cantidad de GB en INAF, por coordinación (Acumulado).",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   
-#   ggeasy::easy_rotate_x_labels(angle = 90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c("axis.text.x", "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_DIA
-# 
-# #GUARDANDO EL GR?FICO
-# ggsave("2.3) Evolución GB por area.jpg",  width = 0.6*ANCHO*ESCAL_CONV, height = 0.6*ALTO*ESCAL_CONV, units="cm",dpi = RES)
-# 
-# 
-# 
-# ################################################################
-
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ################################################################### ###
-# ##   5) AVANCE POR AREA: 4) Tendencia del registro per cápita de IGA   ####
-# # #################################################################### ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF5=BD_INAF %>%
-#   group_by(F_REG, SUB_SECT, REGISTRADOR) %>%
-#   summarise(AUX=n()) %>%
-#   mutate(F_REG=as.Date(F_REG), N_REG=1) %>%
-#   group_by(F_REG, SUB_SECT) %>%
-#   summarise(AUX = sum(AUX), N_REG = sum(N_REG)) %>%
-#   mutate(REGISTROS_PERCAP=AUX/N_REG) %>%
-#   subset(SUB_SECT!="Industria, Residuos Sólidos"|SUB_SECT!="Hidrocarburos, Industria")
-# 
-# 
-# #GRAFICAR
-# AVANCE_REG_PERCAP_DIA <- ggplot(SUB_BD_INAF5,aes(F_REG, (REGISTROS_PERCAP), group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("2 months"))+
-#   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   #theme_minimal()+
-#   ylim(0,20)+
-#   labs(x="",
-#        y="Cantidad de IGA por registrador",
-#        title = "Evolución de la cantidad de IGA per cápita* en INAF, por coordinación**.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realizó la migración de información del DRIVE\ngenerando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
-#   theme(legend.position = "bottom",  legend.title = element_blank(),
-#         panel.grid.minor = element_blank())+  
-#   facet_wrap(.~SUB_SECT, 
-#              #scales="free_x",
-#              nrow = 1,
-#              labeller = label_value,
-#              strip.position = "bottom")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   
-#   ggeasy::easy_rotate_x_labels(angle=90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c( "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_PERCAP_DIA
-# 
-# ggsave("3.4) Tendencia IGAs per cápita.jpg",  width = 12, height = 7)
-# 
-# 
-# ##########################################################################
-
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################################## ###
-# ##   5) AVANCE POR AREA: 5) Tendencia del registro per c?pita de archivos   ####
-# ## ######################################################################## ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF5X=BD_INAF %>%
-#   group_by(F_REG, SUB_SECT, REGISTRADOR) %>%
-#   summarise(N_ARCH = sum(N_ARCH)) %>%
-#   mutate(F_REG=as.Date(F_REG), N_REG=1) %>%
-#   group_by(F_REG, SUB_SECT) %>%
-#   summarise(N_ARCH = sum(N_ARCH), N_REG = sum(N_REG)) %>%
-#   mutate(REGISTROS_PERCAP=N_ARCH/N_REG) %>%
-#   subset(SUB_SECT!="Industria, Residuos Sólidos"|SUB_SECT!="Hidrocarburos, Industria")
-# 
-# 
-# #GRAFICAR
-# AVANCE_ARCH_PERCAP_DIA <- ggplot(SUB_BD_INAF5X,aes(F_REG, (REGISTROS_PERCAP), group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("8 weeks"))+
-#   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   ylim(0,40)+
-#   labs(x="",
-#        y="Cantidad de archivos por registrador",
-#        title = "Evolución de la cantidad de archivos per cápita* en INAF, por coordinación**.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realizó la migración de información del DRIVE\ngenerando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
-#   theme(legend.position = "bottom", legend.title = element_blank(),
-#         panel.grid.minor = element_blank())+  
-#   facet_wrap(.~SUB_SECT, 
-#              #scales="free_x",
-#              nrow = 1,
-#              labeller = label_value,
-#              strip.position = "bottom")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle=90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c( "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-#   AVANCE_ARCH_PERCAP_DIA
-# 
-# ggsave("3.5) Tendencia ARCHIVOS per cápita.jpg",  width = 12, height = 7)
-# 
-# 
-# ###############################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## ######################################################################## ###
-# ##   5) AVANCE POR AREA: 5) Tendencia del registro per c?pita de archivos   ####
-# ## ######################################################################## ###
-# 
-# #GENERANDO LA NUEVA BD
-# SUB_BD_INAF5X=BD_INAF %>%
-#   group_by(F_REG, SUB_SECT, REGISTRADOR) %>%
-#   summarise(ARCH_SIZE_MB = sum(ARCH_SIZE_MB)) %>%
-#   mutate(F_REG=as.Date(F_REG), N_REG=1) %>%
-#   group_by(F_REG, SUB_SECT) %>%
-#   summarise(ARCH_SIZE_MB = sum(ARCH_SIZE_MB/1024), N_REG = sum(N_REG)) %>%
-#   mutate(REGISTROS_PERCAP=ARCH_SIZE_MB/N_REG) %>%
-#   subset(SUB_SECT!="Industria, Residuos Sólidos"|SUB_SECT!="Hidrocarburos, Industria")
-# 
-# 
-# #GRAFICAR
-# AVANCE_ARCH_PERCAP_DIA <- ggplot(SUB_BD_INAF5X,aes(F_REG, (REGISTROS_PERCAP), group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_line(size=1) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("8 weeks"))+
-#   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   ylim(0,7.5)+
-#   labs(x="",
-#        y="Cantidad de GB por registrador",
-#        title = "Evolución de la cantidad de GB per cápita* en INAF, por coordinación**.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia\n*Nota 1: Cantidad promedio de registros por cada registrador\n*Nota 2: Entre la segunda y tercera semana de mayo se realizó la migración de información del DRIVE\ngenerando picos de llenado, por lo que el eje Y ha sido acotado al valor 40")+
-#   theme(legend.position = "bottom", legend.title = element_blank(),
-#         panel.grid.minor = element_blank())+  
-#   facet_wrap(.~SUB_SECT, 
-#              #scales="free_x",
-#              nrow = 1,
-#              labeller = label_value,
-#              strip.position = "bottom")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle=90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c( "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_ARCH_PERCAP_DIA
-# 
-# ggsave("3.6) Tendencia GB per cápita.jpg",  width = 12, height = 7)
-# 
-# 
-# ###############################################################################
-
-
-# __________________________________________________________________________________________________________________________________________________________
-
-# ## #################################################### ###
-# ##   6) AVANCE POR AREA: 1) Cantidad de registradores   ####
-# ## #################################################### ###
-# 
-# #GRAFICAR
-# AVANCE_REG_PERCAP_DIA <- ggplot(SUB_BD_INAF5,aes(F_REG, (N_REG), group = SUB_SECT, color = factor(SUB_SECT))) +
-#   geom_step(size=1) +
-#   scale_x_date(labels = date_format("%b %d"), breaks = date_breaks("4 weeks"))+
-#   
-#   geom_smooth(method = "loess", formula = y~x, se=T, color= "firebrick",fill="gray60")+
-#   scale_color_manual(values=c(PALETA.PRINCIPAL,PALETA.SECUNDARIA))+
-#   #theme_minimal()+
-#   #ylim(0,15)+
-#   scale_y_continuous(breaks = seq(0, 15, by = 2))+
-#   labs(x="",
-#        y="Cantidad de registradores",
-#        title = "Evolución de la cantidad de registradores.",
-#        subtitle = paste("(Del ",
-#                         format.Date(input$RANGO[1], "%d/%m/%Y"),
-#                         " al ",
-#                         format.Date(input$RANGO[2], "%d/%m/%Y"),
-#                         ")",
-#                         sep = ""),
-#        caption = "Fuente: INAF\nElaboración: Propia")+
-#   theme(legend.position = "bottom", 
-#         panel.grid.minor = element_blank())+  
-#   facet_wrap(.~SUB_SECT, 
-#              #scales="free_x",
-#              nrow = 2,
-#              labeller = label_value,
-#              strip.position = "bottom")+
-#   guides(color = guide_legend(override.aes = list(size = 5)))+
-#   ggeasy::easy_rotate_x_labels(angle=90)+
-#   
-#   ggeasy::easy_add_legend_title("")+
-#   ggeasy::easy_text_size(c("plot.title"),size = 25)+
-#   ggeasy::easy_text_size(c( "axis.text.y","legend.title","plot.subtitle"),size = 20)+
-#   ggeasy::easy_text_size(c("legend.text","axis.title"),size = 15)
-# 
-# AVANCE_REG_PERCAP_DIA
-# 
-# ggsave("4) Cantidad de registradores.jpg",  width = 12, height = 7)
-# 
-# 
-# ###########################################################
 
 
 # __________________________________________________________________________________________________________________________________________________________
@@ -2499,10 +1598,12 @@ unlink("TAB1.html") #Elimina el "temporal"
 ##   7) SANKEY + TABLA: 6) CRES   ####
 ## ############################## ###
 
+
 #GENERANDO LA NUEVA BD
 TAB_ESTADO_CRES = BD_IGAS %>%
  
   # subset(SUB_SECT == "CRES") %>%
+  subset(SUB_SECT=="CRES") %>%
   group_by(ETAPA, ESTADO) %>%
   summarise(AUX = n()) %>%
   as.data.frame() %>%
